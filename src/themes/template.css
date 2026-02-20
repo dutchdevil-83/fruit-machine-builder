@@ -1,0 +1,46 @@
+/* ============================================
+   Custom Theme Template — Fruit Machine Builder
+   ============================================
+   
+   HOW TO USE:
+   1. Copy this file and rename it (e.g., "ocean-blue.css")
+   2. Replace "my-custom-theme" with your theme name (no spaces, lowercase)
+   3. Set all CSS variable values below
+   4. Import via the Theme Settings panel in the builder
+   
+   WCAG REQUIREMENTS:
+   - Text on backgrounds must have at least 4.5:1 contrast ratio (AA)
+   - Large text (18px+ bold, 24px+ normal) needs 3:1 minimum
+   - Use https://webaim.org/resources/contrastchecker/ to verify
+   
+   GALLERY UPLOAD:
+   Themes uploaded to the Community Gallery must pass WCAG AA checks.
+   The builder will run automated checks before allowing upload.
+   ============================================ */
+
+[data-theme="my-custom-theme"] {
+  /* ── Backgrounds ── */
+  --bg-primary: #0f0f14;      /* Main app background */
+  --bg-secondary: #1a1a24;    /* Header, sidebar background */
+  --bg-panel: #22222e;        /* Card and panel background */
+  --bg-input: #2a2a38;        /* Input fields, dropdowns */
+
+  /* ── Borders ── */
+  --border: #3a3a4e;          /* Default border color */
+  --border-focus: #6c5ce7;    /* Focus ring color */
+
+  /* ── Text ── */
+  --text-primary: #e8e8f0;    /* Main text (contrast ≥ 4.5:1 on bg-primary) */
+  --text-secondary: #9898b0;  /* Secondary labels (contrast ≥ 4.5:1) */
+  --text-muted: #686880;      /* Muted/hint text (contrast ≥ 3:1 for large text) */
+
+  /* ── Brand ── */
+  --accent: #6c5ce7;          /* Primary action color */
+  --accent-glow: rgba(108, 92, 231, 0.3);  /* Glow effect around focused items */
+
+  /* ── Status ── */
+  --success: #00b894;         /* Success indicators */
+  --warning: #fdcb6e;         /* Warning indicators */
+  --danger: #e17055;          /* Error/danger indicators */
+  --win-gold: #ffd700;        /* Win amount highlight color */
+}

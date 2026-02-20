@@ -1,0 +1,20 @@
+/* === Default Light Theme === */
+/* WCAG AA compliant contrast ratios */
+
+[data-theme="default-light"] {
+    --bg-primary: #f4f5f7;
+    --bg-secondary: #ffffff;
+    --bg-panel: #ffffff;
+    --bg-input: #eef0f4;
+    --border: #d1d5db;
+    --border-focus: #6c5ce7;
+    --text-primary: #1a1a2e;
+    --text-secondary: #4a4a6a;
+    --text-muted: #6b7280;
+    --accent: #6c5ce7;
+    --accent-glow: rgba(108, 92, 231, 0.2);
+    --success: #059669;
+    --warning: #d97706;
+    --danger: #dc2626;
+    --win-gold: #b8860b;
+}

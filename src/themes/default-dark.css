@@ -1,0 +1,20 @@
+/* === Default Dark Theme === */
+/* Current production theme — extracted from index.css */
+
+[data-theme="default-dark"] {
+    --bg-primary: #0f0f14;
+    --bg-secondary: #1a1a24;
+    --bg-panel: #22222e;
+    --bg-input: #2a2a38;
+    --border: #3a3a4e;
+    --border-focus: #6c5ce7;
+    --text-primary: #e8e8f0;
+    --text-secondary: #9898b0;
+    --text-muted: #686880;
+    --accent: #6c5ce7;
+    --accent-glow: rgba(108, 92, 231, 0.3);
+    --success: #00b894;
+    --warning: #fdcb6e;
+    --danger: #e17055;
+    --win-gold: #ffd700;
+}

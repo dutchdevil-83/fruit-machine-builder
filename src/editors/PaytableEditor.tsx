@@ -34,20 +34,19 @@ export function PaytableEditor ()
   {
     const existing = config.paytable.find( pt => pt.symbolId === symbolId );
     const payouts = existing?.payouts ?? {};
-    const twoStrategy = { enabled, payout: existing?.twoSymbolStrategy?.payout ?? 5 };
+    const twoSymbolStrategy = { enabled, payout: existing?.twoSymbolStrategy?.payout ?? 5 };
     setPaytableEntry( symbolId, payouts );
-    // We need to update the full entry including twoSymbolStrategy
-    // Since setPaytableEntry only handles payouts, we update via a second call
-    const fullPaytable = config.paytable.map( pt =>
-      pt.symbolId === symbolId ? { ...pt, payouts, twoSymbolStrategy: twoStrategy } : pt
-    );
-    // If entry doesn't exist, add it
-    if ( !existing )
+    // Update the entry with twoSymbolStrategy via direct paytable mutation
+    // For now we piggyback on the 2-match payout key
+    if ( enabled && twoSymbolStrategy.payout > 0 )
     {
-      fullPaytable.push( { symbolId, payouts, twoSymbolStrategy: twoStrategy } );
+      setPaytableEntry( symbolId, { ...payouts, 2: twoSymbolStrategy.payout } );
+    } else
+    {
+      const cleaned = { ...payouts };
+      delete cleaned[ 2 ];
+      setPaytableEntry( symbolId, cleaned );
     }
-    // We need a batch update — for now we use individual updates
-    // The twoSymbolStrategy will be stored via the store's paytable mechanism
   };
 
   const handleTwoSymbolPayout = ( symbolId: string, value: string ) =>
@@ -55,13 +54,8 @@ export function PaytableEditor ()
     const numVal = parseInt( value ) || 0;
     const existing = config.paytable.find( pt => pt.symbolId === symbolId );
     if ( !existing ) return;
-    const twoStrategy = { enabled: true, payout: numVal };
-    // Store update needed — using setPaytableEntry with extended data
-    setPaytableEntry( symbolId, { ...existing.payouts, ...( { _twoSymbol: numVal } as Record<number, number> ) } );
+    setPaytableEntry( symbolId, { ...existing.payouts, 2: numVal } );
   };
-
-  // Note: The 2-symbol strategy currently shows the UI but full store integration
-  // for twoSymbolStrategy will be refined when the store is extended
 
   return (
     <div className="fade-in" style={ { display: 'flex', flexDirection: 'column', gap: '20px' } }>

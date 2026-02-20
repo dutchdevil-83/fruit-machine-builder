@@ -14,6 +14,8 @@ import { OnboardingWizard } from './components/OnboardingWizard';
 import { HelpPanel } from './components/HelpPanel';
 import { ExportWizard } from './components/ExportWizard';
 import { SaveDialog } from './components/SaveDialog';
+import { useTranslation } from './i18n/I18nProvider';
+import { useTheme } from './themes/ThemeProvider';
 import type { EditorTab } from './types/machine';
 import type { ValidationStatus } from './utils/configValidator';
 
@@ -77,6 +79,8 @@ function App ()
           </span>
         </div>
         <div style={ { display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' } }>
+          <LanguageSelector />
+          <ThemeSelector />
           <OnboardingWizard />
           <PresetManager />
           <SaveButton />
@@ -248,6 +252,58 @@ function PresetManager ()
       </select>
       <button className="btn" style={ { padding: '6px 12px' } } onClick={ loadPreset } disabled={ !selected }>Load</button>
     </div>
+  );
+}
+
+function LanguageSelector ()
+{
+  const { locale, setLocale, availableLocales, languageName, browserLanguage, isBrowserLanguageAvailable } = useTranslation();
+  return (
+    <div style={ { display: 'flex', alignItems: 'center', gap: '4px' } }>
+      <select
+        title="Language"
+        className="input"
+        style={ { padding: '4px 8px', fontSize: '0.8rem' } }
+        value={ locale }
+        onChange={ ( e ) => setLocale( e.target.value ) }
+      >
+        { availableLocales.map( code => (
+          <option key={ code } value={ code }>{ languageName( code ) }</option>
+        ) ) }
+      </select>
+      { !isBrowserLanguageAvailable && (
+        <span
+          style={ {
+            fontSize: '0.7rem',
+            color: 'var(--accent)',
+            cursor: 'pointer',
+            textDecoration: 'underline',
+            whiteSpace: 'nowrap',
+          } }
+          title={ `Your browser language (${ browserLanguage }) isn't available yet` }
+        >
+          🌐 Help translate?
+        </span>
+      ) }
+    </div>
+  );
+}
+
+function ThemeSelector ()
+{
+  const { theme, setTheme, availableThemes } = useTheme();
+  return (
+    <select
+      title="Theme"
+      className="input"
+      style={ { padding: '4px 8px', fontSize: '0.8rem' } }
+      value={ theme }
+      onChange={ ( e ) => setTheme( e.target.value ) }
+    >
+      { availableThemes.map( t => (
+        <option key={ t.id } value={ t.id }>{ t.name }</option>
+      ) ) }
+    </select>
   );
 }
 
