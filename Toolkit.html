@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Random Runner Reel Mapper & Simulator</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                background: #1e1e1e;
+                color: #fff;
+                margin: 0;
+                padding: 20px;
+            }
+
+            .panel {
+                background: #333;
+                padding: 15px;
+                border-radius: 8px;
+                margin-bottom: 20px;
+            }
+
+            .controls-row {
+                display: flex;
+                gap: 15px;
+                align-items: center;
+                flex-wrap: wrap;
+                margin-bottom: 15px;
+            }
+
+            .guidelines {
+                font-size: 12px;
+                color: #aaa;
+                margin-bottom: 10px;
+                display: block;
+                border-left: 3px solid #00ff00;
+                padding-left: 10px;
+            }
+
+            .toolbar {
+                display: flex;
+                gap: 10px;
+                flex-wrap: wrap;
+                min-height: 54px;
+            }
+
+            .symbol {
+                width: 50px;
+                height: 50px;
+                font-size: 24px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: #444;
+                border: 2px solid #666;
+                border-radius: 5px;
+                cursor: grab;
+                -webkit-user-select: none;
+                user-select: none;
+                overflow: hidden;
+            }
+
+            .symbol img {
+                width: 100%;
+                height: 100%;
+                object-fit: contain;
+                pointer-events: none;
+            }
+
+            .symbol:active {
+                cursor: grabbing;
+            }
+
+            .reels-container {
+                display: flex;
+                gap: 20px;
+                overflow-x: auto;
+                margin-bottom: 20px;
+            }
+
+            .reel {
+                min-width: 250px;
+                flex: 1;
+                background: #222;
+                padding: 10px;
+                border-radius: 8px;
+                border: 2px solid #555;
+                height: 400px;
+                overflow-y: auto;
+            }
+
+            .reel-title {
+                text-align: center;
+                margin-top: 0;
+                color: #ffcc00;
+                position: sticky;
+                top: 0;
+                background: #222;
+                padding-bottom: 5px;
+                z-index: 2;
+            }
+
+            .slot {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                margin-bottom: 5px;
+                background: #333;
+                padding: 5px;
+                border-radius: 5px;
+            }
+
+            .slot-num {
+                width: 30px;
+                text-align: right;
+                font-weight: bold;
+                color: #aaa;
+            }
+
+            .drop-zone {
+                width: 60px;
+                height: 60px;
+                border: 2px dashed #777;
+                border-radius: 5px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 24px;
+                background: #2a2a2a;
+                overflow: hidden;
+            }
+
+            .drop-zone img {
+                width: 100%;
+                height: 100%;
+                object-fit: contain;
+                pointer-events: none;
+            }
+
+            .swap-input {
+                width: 60px;
+                padding: 5px;
+                text-align: center;
+                background: #111;
+                color: #fff;
+                border: 1px solid #555;
+                border-radius: 4px;
+            }
+
+            #canvas-container {
+                position: relative;
+                display: inline-block;
+                border: 1px solid #555;
+                display: none;
+                margin-top: 10px;
+            }
+
+            canvas {
+                display: block;
+                cursor: crosshair;
+            }
+
+            #selection-box {
+                position: absolute;
+                border: 2px dashed #00ff00;
+                pointer-events: none;
+                display: none;
+            }
+
+            button,
+            input[type="file"],
+            select,
+            input[type="text"],
+            input[type="range"] {
+                background: #555;
+                color: white;
+                border: 1px solid #777;
+                padding: 8px 12px;
+                border-radius: 4px;
+                cursor: pointer;
+            }
+
+            button:hover {
+                background: #777;
+            }
+
+            button.primary {
+                background: #4CAF50;
+                border-color: #4CAF50;
+            }
+
+            button.primary:hover {
+                background: #45a049;
+            }
+
+            button.danger {
+                background: #f44336;
+                border-color: #f44336;
+            }
+
+            button.danger:hover {
+                background: #da190b;
+            }
+
+            .simulator-panel {
+                background: #222;
+                border: 2px solid #ffcc00;
+                padding: 20px;
+                border-radius: 8px;
+                text-align: center;
+            }
+
+            .sim-window {
+                display: grid;
+                grid-template-columns: repeat(3, 80px);
+                gap: 10px;
+                justify-content: center;
+                margin: 20px auto;
+                background: #111;
+                padding: 15px;
+                border-radius: 8px;
+                border: 2px inset #555;
+                width: max-content;
+                position: relative;
+            }
+
+            .sim-reel {
+                display: flex;
+                flex-direction: column;
+                gap: 5px;
+                height: 240px;
+                overflow: hidden;
+                position: relative;
+                background: #eee;
+                border-radius: 4px;
+            }
+
+            .sim-strip {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                display: flex;
+                flex-direction: column;
+            }
+
+            .sim-symbol {
+                width: 80px;
+                height: 80px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 32px;
+                border-bottom: 1px solid #ccc;
+                box-sizing: border-box;
+            }
+
+            .sim-symbol img {
+                width: 90%;
+                height: 90%;
+                object-fit: contain;
+            }
+
+            .payline-overlay {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                pointer-events: none;
+                z-index: 10;
+            }
+
+            .line {
+                position: absolute;
+                background: rgba(255, 0, 0, 0.6);
+                display: none;
+            }
+
+            .line-h {
+                height: 6px;
+                width: 100%;
+                left: 0;
+            }
+
+            .line-d {
+                height: 6px;
+                width: 120%;
+                left: -10%;
+                transform-origin: center;
+            }
+
+            #win-msg {
+                color: #00ff00;
+                font-size: 24px;
+                font-weight: bold;
+                min-height: 30px;
+                margin-top: 10px;
+            }
+        </style>
+    </head>
+
+    <body>
+
+        <h2>Random Runner Reel Mapper & Simulator</h2>
+
+        <div class="panel">
+            <span class="guidelines">
+                <strong>Image Guidelines:</strong> Sprites max 2048x2048px. Custom symbols best ~80x80px.
+                <strong>Audio Guidelines:</strong> MP3/WAV, max ~500KB recommended. Clear memory if saves fail.
+            </span>
+            <div class="controls-row">
+                <label>Sprite: <input type="file" id="imageLoader" accept="image/*"></label>
+                <button id="extractBtn" style="display:none;">Add Selected as Symbol</button>
+
+                <div
+                    style="margin-left:auto;display:flex;gap:10px;align-items:center;border-left:2px solid #555;padding-left:15px;">
+                    <select id="exportFormat" aria-label="Export format">
+                        <option value="base64">Base64 Encoded (Self-contained)</option>
+                        <option value="sprite">Sprite Coordinates</option>
+                        <option value="path">Relative Paths</option>
+                    </select>
+                    <input type="text" id="spritePathInput" placeholder="sprite.png" style="width:120px;">
+                    <button class="primary" onclick="exportJSON()">Export JSON</button>
+                    <button class="danger" onclick="clearStorage()">Clear Memory</button>
+                </div>
+            </div>
+
+            <div id="canvas-container">
+                <canvas id="cropCanvas"></canvas>
+                <div id="selection-box"></div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="controls-row" style="margin-bottom:0;">
+                <label>Spin Sound: <input type="file" id="spinAudioLoader" accept="audio/*"></label>
+                <label>Win Sound: <input type="file" id="winAudioLoader" accept="audio/*"></label>
+                <button onclick="testAudio('spin')">Test Spin</button>
+                <button onclick="testAudio('win')">Test Win</button>
+            </div>
+        </div>
+
+        <div class="panel toolbar" id="toolbar">
+            <div class="symbol" draggable="true" data-sym-id="sym_star"
+                ondragstart="dragStart(event,'toolbar',null,null,'sym_star',this.innerHTML)">⭐</div>
+            <div class="symbol" draggable="true" data-sym-id="sym_seven"
+                ondragstart="dragStart(event,'toolbar',null,null,'sym_seven',this.innerHTML)">7️⃣</div>
+            <div class="symbol" draggable="true" data-sym-id="sym_clear"
+                ondragstart="dragStart(event,'toolbar',null,null,'sym_clear',this.innerHTML)">❌</div>
+        </div>
+
+        <div class="reels-container" id="reels-container"></div>
+
+        <div class="simulator-panel">
+            <h3 style="color:#ffcc00;margin-top:0;">Live Spin Simulator</h3>
+            <div class="controls-row" style="justify-content:center;">
+                <button class="primary" onclick="startSpin()" style="font-size:20px;padding:10px 30px;">SPIN
+                    REELS</button>
+            </div>
+            <div class="sim-window" id="sim-window">
+                <div class="sim-reel" id="sim-reel-1">
+                    <div class="sim-strip" id="strip-1"></div>
+                </div>
+                <div class="sim-reel" id="sim-reel-2">
+                    <div class="sim-strip" id="strip-2"></div>
+                </div>
+                <div class="sim-reel" id="sim-reel-3">
+                    <div class="sim-strip" id="strip-3"></div>
+                </div>
+                <div class="payline-overlay">
+                    <div class="line line-h" id="line-1" style="top:117px;"></div>
+                    <div class="line line-h" id="line-2" style="top:37px;"></div>
+                    <div class="line line-h" id="line-3" style="top:197px;"></div>
+                    <div class="line line-d" id="line-4" style="top:117px;transform:rotate(35deg);"></div>
+                    <div class="line line-d" id="line-5" style="top:117px;transform:rotate(-35deg);"></div>
+                </div>
+            </div>
+            <div id="win-msg"></div>
+        </div>
+
+        <script>
+            const numPositions = 24, numReels = 3;
+            let draggedData = null, nextSymId = 1, symbolRegistry = {};
+            let audioData = { spin: null, win: null };
+            const audioPlayers = { spin: new Audio(), win: new Audio() };
+
+            const canvas = document.getElementById( 'cropCanvas' ), ctx = canvas.getContext( '2d' );
+            const container = document.getElementById( 'canvas-container' ), selBox = document.getElementById( 'selection-box' );
+            let img = new Image(), isDrawing = false, startX, startY, rectW, rectH;
+
+            document.addEventListener( "DOMContentLoaded", loadStorage );
+
+            function handleAudioUpload ( e, type )
+            {
+                const reader = new FileReader();
+                reader.onload = ( event ) =>
+                {
+                    audioData[ type ] = event.target.result;
+                    audioPlayers[ type ].src = audioData[ type ];
+                    saveStorage();
+                };
+                if ( e.target.files[ 0 ] ) reader.readAsDataURL( e.target.files[ 0 ] );
+            }
+            document.getElementById( 'spinAudioLoader' ).addEventListener( 'change', e => handleAudioUpload( e, 'spin' ) );
+            document.getElementById( 'winAudioLoader' ).addEventListener( 'change', e => handleAudioUpload( e, 'win' ) );
+
+            function testAudio ( type )
+            {
+                if ( audioPlayers[ type ].src && audioData[ type ] )
+                {
+                    audioPlayers[ type ].currentTime = 0;
+                    audioPlayers[ type ].play();
+                }
+            }
+
+            document.getElementById( 'imageLoader' ).addEventListener( 'change', e =>
+            {
+                const reader = new FileReader();
+                reader.onload = event =>
+                {
+                    img.onload = () =>
+                    {
+                        const scale = img.width > 800 ? 800 / img.width : 1;
+                        canvas.width = img.width * scale; canvas.height = img.height * scale;
+                        ctx.drawImage( img, 0, 0, canvas.width, canvas.height );
+                        container.style.display = 'inline-block';
+                        document.getElementById( 'extractBtn' ).style.display = 'inline-block';
+                        canvas.dataset.scale = scale;
+                    }
+                    img.src = event.target.result;
+                }
+                if ( e.target.files[ 0 ] ) reader.readAsDataURL( e.target.files[ 0 ] );
+            } );
+
+            canvas.addEventListener( 'mousedown', e =>
+            {
+                const r = canvas.getBoundingClientRect();
+                startX = e.clientX - r.left; startY = e.clientY - r.top;
+                isDrawing = true;
+                selBox.style.left = startX + 'px'; selBox.style.top = startY + 'px';
+                selBox.style.width = '0px'; selBox.style.height = '0px'; selBox.style.display = 'block';
+            } );
+            canvas.addEventListener( 'mousemove', e =>
+            {
+                if ( !isDrawing ) return;
+                const r = canvas.getBoundingClientRect();
+                rectW = ( e.clientX - r.left ) - startX; rectH = ( e.clientY - r.top ) - startY;
+                selBox.style.width = Math.abs( rectW ) + 'px'; selBox.style.height = Math.abs( rectH ) + 'px';
+                selBox.style.left = ( rectW < 0 ? startX + rectW : startX ) + 'px';
+                selBox.style.top = ( rectH < 0 ? startY + rectH : startY ) + 'px';
+            } );
+            canvas.addEventListener( 'mouseup', () => isDrawing = false );
+
+            document.getElementById( 'extractBtn' ).addEventListener( 'click', () =>
+            {
+                if ( !rectW || !rectH ) return;
+                const s = parseFloat( canvas.dataset.scale );
+                const exCanvas = document.createElement( 'canvas' ), exCtx = exCanvas.getContext( '2d' );
+                const tX = Math.round( ( rectW < 0 ? startX + rectW : startX ) / s ), tY = Math.round( ( rectH < 0 ? startY + rectH : startY ) / s );
+                const tW = Math.round( Math.abs( rectW ) / s ), tH = Math.round( Math.abs( rectH ) / s );
+                exCanvas.width = tW; exCanvas.height = tH;
+                exCtx.drawImage( img, tX, tY, tW, tH, 0, 0, tW, tH );
+                const symId = `sym_ext_${ Date.now() }_${ nextSymId++ }`;
+                const b64 = exCanvas.toDataURL( 'image/png' );
+                symbolRegistry[ symId ] = { base64: b64, x: tX, y: tY, w: tW, h: tH };
+                addSymbolToToolbar( symId, b64 );
+                selBox.style.display = 'none'; rectW = 0; rectH = 0;
+                saveStorage();
+            } );
+
+            function addSymbolToToolbar ( symId, b64 )
+            {
+                const d = document.createElement( 'div' );
+                d.className = 'symbol'; d.draggable = true; d.dataset.symId = symId;
+                const h = `<img src="${ b64 }">`; d.innerHTML = h;
+                d.ondragstart = e => dragStart( e, 'toolbar', null, null, symId, h );
+                document.getElementById( 'toolbar' ).insertBefore( d, document.getElementById( 'toolbar' ).lastElementChild );
+            }
+
+            function initReels ()
+            {
+                const rc = document.getElementById( 'reels-container' ); rc.innerHTML = '';
+                for ( let r = 1; r <= numReels; r++ )
+                {
+                    const rd = document.createElement( 'div' ); rd.className = 'reel';
+                    rd.innerHTML = `<h3 class="reel-title">Reel ${ r }</h3>`;
+                    for ( let p = 1; p <= numPositions; p++ )
+                    {
+                        const sd = document.createElement( 'div' ); sd.className = 'slot';
+                        sd.innerHTML = `<div class="slot-num">${ p }</div>
+          <div class="drop-zone" id="zone-${ r }-${ p }" data-sym-id="" draggable="true" 
+               ondragstart="handleReelDragStart(event,${ r },${ p })" ondragover="allowDrop(event)" ondrop="drop(event,${ r },${ p })"></div>
+          <input type="number" class="swap-input" min="1" max="24" placeholder="Pos" onchange="manualSwap(this,${ r },${ p })">`;
+                        rd.appendChild( sd );
+                    }
+                    rc.appendChild( rd );
+                }
+            }
+
+            function dragStart ( e, src, r, p, sId, c )
+            {
+                if ( src === 'reel' && !sId ) { e.preventDefault(); return; }
+                draggedData = { src, r, p, sId, c };
+                e.dataTransfer.setData( 'text/plain', 'dragging' );
+            }
+            function handleReelDragStart ( e, r, p )
+            {
+                const z = document.getElementById( `zone-${ r }-${ p }` );
+                dragStart( e, 'reel', r, p, z.dataset.symId, z.innerHTML );
+            }
+            function allowDrop ( e ) { e.preventDefault(); }
+            function drop ( e, tR, tP )
+            {
+                e.preventDefault(); if ( !draggedData ) return;
+                const tZ = document.getElementById( `zone-${ tR }-${ tP }` );
+                const cc = tZ.innerHTML, cs = tZ.dataset.symId;
+                if ( draggedData.sId === 'sym_clear' ) { tZ.innerHTML = ''; tZ.dataset.symId = ''; }
+                else { tZ.innerHTML = draggedData.c; tZ.dataset.symId = draggedData.sId; }
+                if ( draggedData.src === 'reel' )
+                {
+                    const sZ = document.getElementById( `zone-${ draggedData.r }-${ draggedData.p }` );
+                    sZ.innerHTML = cc; sZ.dataset.symId = cs || '';
+                }
+                draggedData = null; saveStorage();
+            }
+            function manualSwap ( i, r, p )
+            {
+                const tP = parseInt( i.value ); i.value = '';
+                if ( isNaN( tP ) || tP < 1 || tP > numPositions || tP === p ) return;
+                const sZ = document.getElementById( `zone-${ r }-${ p }` ), tZ = document.getElementById( `zone-${ r }-${ tP }` );
+                const tc = sZ.innerHTML, ts = sZ.dataset.symId;
+                sZ.innerHTML = tZ.innerHTML; sZ.dataset.symId = tZ.dataset.symId;
+                tZ.innerHTML = tc; tZ.dataset.symId = ts;
+                saveStorage();
+            }
+
+            function getReelData ( r )
+            {
+                let arr = [];
+                for ( let p = 1; p <= numPositions; p++ )
+                {
+                    const z = document.getElementById( `zone-${ r }-${ p }` );
+                    arr.push( { id: z.dataset.symId, c: z.innerHTML || '<div style="color:#aaa;">-</div>' } );
+                }
+                return arr;
+            }
+
+            let spinIntervals = [];
+            function startSpin ()
+            {
+                spinIntervals.forEach( clearInterval ); spinIntervals = [];
+                document.querySelectorAll( '.line' ).forEach( l => l.style.display = 'none' );
+                document.getElementById( 'win-msg' ).innerText = '';
+
+                if ( audioData.spin ) { audioPlayers.spin.currentTime = 0; audioPlayers.spin.play(); }
+
+                let finalStops = [];
+                let mapped = [ getReelData( 1 ), getReelData( 2 ), getReelData( 3 ) ];
+
+                for ( let r = 1; r <= numReels; r++ )
+                {
+                    const strip = document.getElementById( `strip-${ r }` );
+                    const stopIdx = Math.floor( Math.random() * numPositions );
+                    finalStops.push( stopIdx );
+
+                    let vis = [ mapped[ r - 1 ][ stopIdx ], mapped[ r - 1 ][ ( stopIdx + 1 ) % 24 ], mapped[ r - 1 ][ ( stopIdx + 2 ) % 24 ] ];
+                    let fullStrip = [ ...mapped[ r - 1 ].map( x => x.c ), ...mapped[ r - 1 ].map( x => x.c ), ...vis.map( x => x.c ) ];
+                    strip.innerHTML = fullStrip.map( s => `<div class="sim-symbol">${ s }</div>` ).join( '' );
+
+                    let currentY = 0;
+                    const tHeight = numPositions * 80;
+                    const eTime = Date.now() + 2000 + ( r * 500 );
+
+                    const interval = setInterval( () =>
+                    {
+                        if ( Date.now() > eTime )
+                        {
+                            clearInterval( interval );
+                            strip.style.transform = `translateY(-${ tHeight * 2 }px)`;
+                            strip.style.transition = 'transform 0.5s cubic-bezier(0.25, 0.1, 0.25, 1)';
+                            if ( r === numReels ) setTimeout( () => calculatePaylines( mapped, finalStops ), 600 );
+                        } else
+                        {
+                            currentY -= 30; if ( Math.abs( currentY ) >= tHeight ) currentY = 0;
+                            strip.style.transition = 'none'; strip.style.transform = `translateY(${ currentY }px)`;
+                        }
+                    }, 20 );
+                    spinIntervals.push( interval );
+                }
+            }
+
+            function calculatePaylines ( reels, stops )
+            {
+                if ( audioData.spin ) { audioPlayers.spin.pause(); audioPlayers.spin.currentTime = 0; }
+
+                const grid = [
+                    [ reels[ 0 ][ stops[ 0 ] ].id, reels[ 1 ][ stops[ 1 ] ].id, reels[ 2 ][ stops[ 2 ] ].id ],
+                    [ reels[ 0 ][ ( stops[ 0 ] + 1 ) % 24 ].id, reels[ 1 ][ ( stops[ 1 ] + 1 ) % 24 ].id, reels[ 2 ][ ( stops[ 2 ] + 1 ) % 24 ].id ],
+                    [ reels[ 0 ][ ( stops[ 0 ] + 2 ) % 24 ].id, reels[ 1 ][ ( stops[ 1 ] + 2 ) % 24 ].id, reels[ 2 ][ ( stops[ 2 ] + 2 ) % 24 ].id ]
+                ];
+
+                const lines = [
+                    { id: 1, p: [ grid[ 1 ][ 0 ], grid[ 1 ][ 1 ], grid[ 1 ][ 2 ] ] },
+                    { id: 2, p: [ grid[ 0 ][ 0 ], grid[ 0 ][ 1 ], grid[ 0 ][ 2 ] ] },
+                    { id: 3, p: [ grid[ 2 ][ 0 ], grid[ 2 ][ 1 ], grid[ 2 ][ 2 ] ] },
+                    { id: 4, p: [ grid[ 0 ][ 0 ], grid[ 1 ][ 1 ], grid[ 2 ][ 2 ] ] },
+                    { id: 5, p: [ grid[ 2 ][ 0 ], grid[ 1 ][ 1 ], grid[ 0 ][ 2 ] ] }
+                ];
+
+                let wins = [];
+                lines.forEach( l =>
+                {
+                    if ( l.p[ 0 ] && l.p[ 0 ] === l.p[ 1 ] && l.p[ 1 ] === l.p[ 2 ] && l.p[ 0 ] !== 'sym_clear' ) wins.push( l.id );
+                } );
+
+                if ( wins.length > 0 )
+                {
+                    if ( audioData.win ) { audioPlayers.win.currentTime = 0; audioPlayers.win.play(); }
+                    document.getElementById( 'win-msg' ).innerText = `WIN ON LINE(S): ${ wins.join( ', ' ) }!`;
+                    wins.forEach( w => document.getElementById( `line-${ w }` ).style.display = 'block' );
+                }
+            }
+
+            function saveStorage ()
+            {
+                try
+                {
+                    const s = { registry: symbolRegistry, nextId: nextSymId, audio: audioData, reels: {} };
+                    for ( let r = 1; r <= numReels; r++ )
+                    {
+                        s.reels[ r ] = [];
+                        for ( let p = 1; p <= numPositions; p++ )
+                        {
+                            const z = document.getElementById( `zone-${ r }-${ p }` );
+                            s.reels[ r ].push( { id: z.dataset.symId, c: z.innerHTML } );
+                        }
+                    }
+                    localStorage.setItem( 'rrMapper', JSON.stringify( s ) );
+                } catch ( e ) { alert( "Storage full! Please clear memory." ); }
+            }
+
+            function loadStorage ()
+            {
+                initReels();
+                const d = localStorage.getItem( 'rrMapper' ); if ( !d ) return;
+                try
+                {
+                    const s = JSON.parse( d );
+                    symbolRegistry = s.registry || {}; nextSymId = s.nextId || 1;
+                    audioData = s.audio || { spin: null, win: null };
+                    if ( audioData.spin ) audioPlayers.spin.src = audioData.spin;
+                    if ( audioData.win ) audioPlayers.win.src = audioData.win;
+
+                    Object.keys( symbolRegistry ).forEach( k => addSymbolToToolbar( k, symbolRegistry[ k ].base64 ) );
+                    for ( let r = 1; r <= numReels; r++ )
+                    {
+                        if ( !s.reels[ r ] ) continue;
+                        for ( let p = 1; p <= numPositions; p++ )
+                        {
+                            const z = document.getElementById( `zone-${ r }-${ p }` );
+                            z.dataset.symId = s.reels[ r ][ p - 1 ].id || ''; z.innerHTML = s.reels[ r ][ p - 1 ].c || '';
+                        }
+                    }
+                } catch ( e ) { }
+            }
+
+            function clearStorage ()
+            {
+                if ( confirm( "Clear memory? Deletes custom symbols, audio, and mappings." ) )
+                {
+                    localStorage.removeItem( 'rrMapper' ); location.reload();
+                }
+            }
+
+            function exportJSON ()
+            {
+                const format = document.getElementById( 'exportFormat' ).value;
+                const path = document.getElementById( 'spritePathInput' ).value || 'path';
+                const ed = { settings: { mapping_format: format, base_path: path }, audio: audioData, symbols: {}, reels: {} };
+
+                const uIds = new Set();
+                for ( let r = 1; r <= numReels; r++ )
+                {
+                    ed.reels[ r ] = [];
+                    for ( let p = 1; p <= numPositions; p++ )
+                    {
+                        const i = document.getElementById( `zone-${ r }-${ p }` ).dataset.symId || null;
+                        ed.reels[ r ].push( i ); if ( i ) uIds.add( i );
+                    }
+                }
+                uIds.forEach( id =>
+                {
+                    if ( id.startsWith( 'sym_ext_' ) )
+                    {
+                        const r = symbolRegistry[ id ];
+                        if ( format === 'base64' ) ed.symbols[ id ] = { type: 'image', data: r.base64 };
+                        else if ( format === 'sprite' ) ed.symbols[ id ] = { type: 'sprite', image: path, x: r.x, y: r.y, w: r.w, h: r.h };
+                        else ed.symbols[ id ] = { type: 'path', path: `${ path }/${ id }.png` };
+                    } else
+                    {
+                        const m = { 'sym_star': '⭐', 'sym_seven': '7️⃣' };
+                        ed.symbols[ id ] = { type: 'emoji', value: m[ id ] };
+                    }
+                } );
+                const a = document.createElement( 'a' );
+                a.href = "data:text/json;charset=utf-8," + encodeURIComponent( JSON.stringify( ed, null, 2 ) );
+                a.download = "reels_mapping.json"; document.body.appendChild( a ); a.click(); a.remove();
+            }
+        </script>
+
+    </body>
+
+</html>

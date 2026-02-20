@@ -1,0 +1,28 @@
+{
+    "appId": "com.fruitmachinebuilder.player",
+    "productName": "Fruit Machine Player",
+    "directories": {
+        "output": "electron-dist-player"
+    },
+    "files": [
+        "dist/**/*",
+        "electron/**/*"
+    ],
+    "win": {
+        "target": [
+            {
+                "target": "portable",
+                "arch": [
+                    "x64"
+                ]
+            }
+        ],
+        "icon": "electron/icon.png"
+    },
+    "portable": {
+        "artifactName": "FruitMachine-Player-${version}-Portable.exe"
+    },
+    "extraMetadata": {
+        "main": "electron/main.js"
+    }
+}

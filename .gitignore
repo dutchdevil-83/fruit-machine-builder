@@ -1,0 +1,46 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+electron-dist/
+electron-dist-player/
+
+# Standalone export
+FruitMachineBuilder_Standalone.zip
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# OS files
+Thumbs.db
+.DS_Store
+Desktop.ini
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# TypeScript build cache
+*.tsbuildinfo
+
+# Test coverage
+coverage/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Gemini/Antigravity brain (local agent state)
+.gemini/

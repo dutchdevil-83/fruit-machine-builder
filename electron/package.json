@@ -1,0 +1,51 @@
+{
+    "name": "fruit-machine-builder-desktop",
+    "version": "1.0.0",
+    "description": "Standalone desktop version of the Fruit Machine Builder",
+    "main": "electron/main.js",
+    "author": "Marco Meurs",
+    "license": "MIT",
+    "scripts": {
+        "electron:dev": "electron . --dev",
+        "electron:play": "electron . --play",
+        "electron:build": "npm run build && electron-builder",
+        "electron:build-play": "npm run build && electron-builder --config electron-builder-play.json"
+    },
+    "build": {
+        "appId": "com.fruitmachinebuilder.app",
+        "productName": "Fruit Machine Builder",
+        "directories": {
+            "output": "electron-dist"
+        },
+        "files": [
+            "dist/**/*",
+            "electron/**/*"
+        ],
+        "win": {
+            "target": [
+                {
+                    "target": "portable",
+                    "arch": [
+                        "x64"
+                    ]
+                }
+            ],
+            "icon": "electron/icon.png"
+        },
+        "portable": {
+            "artifactName": "FruitMachineBuilder-${version}-Portable.exe"
+        },
+        "mac": {
+            "target": [
+                "dmg"
+            ],
+            "icon": "electron/icon.png"
+        },
+        "linux": {
+            "target": [
+                "AppImage"
+            ],
+            "icon": "electron/icon.png"
+        }
+    }
+}
