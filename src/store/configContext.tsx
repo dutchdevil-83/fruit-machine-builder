@@ -114,6 +114,7 @@ type Action =
     | { type: 'SET_PAYTABLE_ENTRY'; symbolId: string; payouts: Record<number, number> }
     | { type: 'SET_ANIMATION_SETTINGS'; settings: Partial<MachineConfig[ 'settings' ][ 'animation' ]> }
     | { type: 'SET_AUDIO_SETTINGS'; settings: Partial<MachineConfig[ 'settings' ][ 'audio' ]> }
+    | { type: 'RENAME_SYMBOL'; oldId: string; newId: string }
     | { type: 'IMPORT_CONFIG'; config: MachineConfig }
     | { type: 'RESET' };
 
@@ -269,6 +270,26 @@ function configReducer ( state: ConfigState, action: Action ): ConfigState
         case 'IMPORT_CONFIG':
             return { ...state, config: action.config };
 
+        case 'RENAME_SYMBOL': {
+            const { oldId, newId } = action;
+            if ( oldId === newId ) return state;
+            return {
+                ...state,
+                config: {
+                    ...config,
+                    symbols: config.symbols.map( sym =>
+                        sym.id === oldId ? { ...sym, id: newId } : sym
+                    ),
+                    reelStrips: config.reelStrips.map( strip =>
+                        strip.map( sId => sId === oldId ? newId : sId )
+                    ),
+                    paytable: config.paytable.map( pt =>
+                        pt.symbolId === oldId ? { ...pt, symbolId: newId } : pt
+                    ),
+                },
+            };
+        }
+
         case 'RESET':
             return { ...state, config: createDefaultConfig() };
 
@@ -328,6 +349,7 @@ export interface ConfigStoreAPI
     setPaytableEntry: ( symbolId: string, payouts: Record<number, number> ) => void;
     setAnimationSettings: ( settings: Partial<MachineConfig[ 'settings' ][ 'animation' ]> ) => void;
     setAudioSettings: ( settings: Partial<MachineConfig[ 'settings' ][ 'audio' ]> ) => void;
+    renameSymbol: ( oldId: string, newId: string ) => void;
     exportJSON: () => string;
     importJSON: ( json: string ) => boolean;
     resetToDefault: () => void;
@@ -359,6 +381,7 @@ export function useConfigStore<T> ( selector?: ( store: ConfigStoreAPI ) => T ):
     const setPaytableEntry = useCallback( ( symbolId: string, payouts: Record<number, number> ) => dispatch( { type: 'SET_PAYTABLE_ENTRY', symbolId, payouts } ), [ dispatch ] );
     const setAnimationSettings = useCallback( ( settings: Partial<MachineConfig[ 'settings' ][ 'animation' ]> ) => dispatch( { type: 'SET_ANIMATION_SETTINGS', settings } ), [ dispatch ] );
     const setAudioSettings = useCallback( ( settings: Partial<MachineConfig[ 'settings' ][ 'audio' ]> ) => dispatch( { type: 'SET_AUDIO_SETTINGS', settings } ), [ dispatch ] );
+    const renameSymbol = useCallback( ( oldId: string, newId: string ) => dispatch( { type: 'RENAME_SYMBOL', oldId, newId } ), [ dispatch ] );
 
     const exportJSON = useCallback( () => JSON.stringify( state.config, null, 2 ), [ state.config ] );
     const importJSON = useCallback( ( json: string ): boolean =>
@@ -395,6 +418,7 @@ export function useConfigStore<T> ( selector?: ( store: ConfigStoreAPI ) => T ):
         setPaytableEntry,
         setAnimationSettings,
         setAudioSettings,
+        renameSymbol,
         exportJSON,
         importJSON,
         resetToDefault,

@@ -1,0 +1,103 @@
+{
+    "_schema_version": "1.0",
+    "_instructions": "This is a Fruit Machine Builder configuration file (.fmb.json). You can edit this file externally and re-import it into the builder via the 'Load' button or drag-and-drop. All fields are documented below. For community sharing, include your name in the 'name' field.",
+    "name": "My Custom Machine",
+    "reels": 3,
+    "rows": 3,
+    "stripLength": 24,
+    "symbols": [
+        {
+            "id": "sym_example",
+            "name": "Example Symbol",
+            "image": "",
+            "isWild": false,
+            "_note": "id must be unique, start with 'sym_'. image can be a base64 DataURL or empty. Set isWild:true for wild/substitute symbols."
+        }
+    ],
+    "reelStrips": [
+        [
+            "sym_example",
+            "sym_example",
+            "sym_example"
+        ],
+        "_note: Each sub-array is one reel. Length must match 'stripLength'. Each entry is a symbol id from the 'symbols' array."
+    ],
+    "paylines": [
+        {
+            "id": 1,
+            "cells": [
+                1,
+                1,
+                1
+            ],
+            "color": "#e74c3c",
+            "_note": "cells array length must match 'reels'. Each value is a row index (0-based). color is a CSS color string."
+        }
+    ],
+    "paytable": [
+        {
+            "symbolId": "sym_example",
+            "payouts": {
+                "3": 100
+            },
+            "_note": "payouts keys are match counts (e.g. '3' = three-of-a-kind). Values are credit amounts."
+        }
+    ],
+    "settings": {
+        "startCredits": 1000,
+        "betOptions": [
+            1,
+            2,
+            5,
+            10,
+            20
+        ],
+        "defaultBet": 1,
+        "animation": {
+            "preset": "elastic",
+            "durationMs": 2000,
+            "spinSpeed": 30,
+            "bounceStrength": 0.5,
+            "blurLevel": 5,
+            "_note": "preset options: 'elastic', 'linear', 'ease-out', 'instant'. durationMs: 500-5000."
+        },
+        "audio": {
+            "masterVolume": 1.0,
+            "bgmEnabled": false,
+            "bgmVolume": 0.5,
+            "events": {
+                "spinStart": {
+                    "enabled": true,
+                    "type": "synth",
+                    "synthPreset": "mechanical",
+                    "volume": 0.8
+                },
+                "reelStop": {
+                    "enabled": true,
+                    "type": "synth",
+                    "synthPreset": "click",
+                    "volume": 0.8
+                },
+                "winNormal": {
+                    "enabled": true,
+                    "type": "synth",
+                    "synthPreset": "coin",
+                    "volume": 1.0
+                },
+                "winBig": {
+                    "enabled": true,
+                    "type": "synth",
+                    "synthPreset": "fanfare",
+                    "volume": 1.0
+                },
+                "_note": "type: 'synth' or 'file'. synthPreset options: 'mechanical', 'click', 'coin', 'fanfare', 'beep'. For 'file' type, set fileUrl to a base64 DataURL."
+            }
+        }
+    },
+    "_developer_notes": [
+        "This file can be edited in any text editor or programmatically generated.",
+        "Import back into the builder via the Load button or Open JSON.",
+        "Share .fmb.json files with other users — they can import them directly.",
+        "Future: Community Gallery integration will allow uploading and downloading configs."
+    ]
+}

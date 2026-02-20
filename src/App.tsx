@@ -13,6 +13,7 @@ import { validateConfig } from './utils/configValidator';
 import { OnboardingWizard } from './components/OnboardingWizard';
 import { HelpPanel } from './components/HelpPanel';
 import { ExportWizard } from './components/ExportWizard';
+import { SaveDialog } from './components/SaveDialog';
 import type { EditorTab } from './types/machine';
 import type { ValidationStatus } from './utils/configValidator';
 
@@ -78,6 +79,7 @@ function App ()
         <div style={ { display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' } }>
           <OnboardingWizard />
           <PresetManager />
+          <SaveButton />
           <ExportButton />
           <ImportButton />
         </div>
@@ -171,7 +173,7 @@ function ImportButton ()
   {
     const input = document.createElement( 'input' );
     input.type = 'file';
-    input.accept = '.json';
+    input.accept = '.json,.fmb.json';
     input.onchange = async () =>
     {
       const file = input.files?.[ 0 ];
@@ -190,9 +192,19 @@ function ImportButton ()
   );
 }
 
+function SaveButton ()
+{
+  const [ showDialog, setShowDialog ] = useState( false );
+  return (
+    <>
+      <button className="btn" onClick={ () => setShowDialog( true ) }>💾 Save</button>
+      <SaveDialog isOpen={ showDialog } onClose={ () => setShowDialog( false ) } />
+    </>
+  );
+}
+
 function PresetManager ()
 {
-  const exportJSON = useConfigStore( ( s ) => s.exportJSON );
   const importJSON = useConfigStore( ( s ) => s.importJSON );
   const [ presets, setPresets ] = useState<string[]>( [] );
   const [ selected, setSelected ] = useState<string>( '' );
@@ -207,20 +219,6 @@ function PresetManager ()
       if ( keys.length > 0 ) setSelected( keys[ 0 ]! );
     }
   }, [] );
-
-  const savePreset = () =>
-  {
-    const name = window.prompt( 'Enter preset name (e.g., Phase1_Test):' );
-    if ( !name ) return;
-
-    const p = localStorage.getItem( 'fmb_presets' );
-    const db = p ? JSON.parse( p ) : {};
-    db[ name ] = exportJSON();
-
-    localStorage.setItem( 'fmb_presets', JSON.stringify( db ) );
-    setPresets( Object.keys( db ) );
-    setSelected( name );
-  };
 
   const loadPreset = () =>
   {
@@ -249,7 +247,6 @@ function PresetManager ()
         { presets.map( p => <option key={ p } value={ p }>{ p }</option> ) }
       </select>
       <button className="btn" style={ { padding: '6px 12px' } } onClick={ loadPreset } disabled={ !selected }>Load</button>
-      <button className="btn" style={ { padding: '6px 12px' } } onClick={ savePreset }>💾 Save</button>
     </div>
   );
 }
