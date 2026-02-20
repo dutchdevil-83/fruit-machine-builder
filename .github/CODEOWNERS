@@ -1,0 +1,13 @@
+# Default owner for everything
+* @dutchdevil-83
+
+# CI / GitHub Actions
+.github/ @dutchdevil-83
+
+# Core engine logic
+src/utils/ @dutchdevil-83
+src/simulator/ @dutchdevil-83
+
+# Electron / Desktop export
+electron/ @dutchdevil-83
+build_zip.py @dutchdevil-83
