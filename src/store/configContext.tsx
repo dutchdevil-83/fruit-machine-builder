@@ -59,6 +59,7 @@ function createDefaultConfig (): MachineConfig
         reels: 3,
         rows: 3,
         stripLength,
+        minMatchCount: 3,
         symbols,
         reelStrips,
         paylines,

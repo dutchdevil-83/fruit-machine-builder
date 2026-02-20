@@ -21,6 +21,11 @@ export interface PaytableEntry {
   symbolId: string;
   /** Keyed by match count, e.g. { 3: 40, 4: 100, 5: 500 } */
   payouts: Record<number, number>;
+  /** Optional 2-symbol match strategy */
+  twoSymbolStrategy?: {
+    enabled: boolean;
+    payout: number;
+  };
 }
 
 /** Full machine configuration */
@@ -29,6 +34,7 @@ export interface MachineConfig {
   reels: number;           // number of reel columns
   rows: number;            // visible rows per reel
   stripLength: number;     // symbols per reel strip
+  minMatchCount: number;   // minimum symbols for a win (2 or 3, default 3)
   symbols: SymbolDef[];
   /** Reel strips: reelStrips[reelIndex] = array of symbolIds, length = stripLength */
   reelStrips: string[][];

@@ -45,7 +45,7 @@ export const TEMPLATES: TemplateInfo[] = [
     reels: 3, rows: 3, paylineCount: 5,
     config: {
       name: 'Classic Fruit Machine',
-      reels: 3, rows: 3, stripLength: 24,
+      reels: 3, rows: 3, stripLength: 24, minMatchCount: 3,
       symbols: [
         { id: 'sym_star', name: 'Star', image: '/images/star.png', isWild: true },
         { id: 'sym_seven', name: 'Seven', image: '/images/seven.png', isWild: false },
@@ -88,7 +88,7 @@ export const TEMPLATES: TemplateInfo[] = [
     reels: 5, rows: 3, paylineCount: 20,
     config: {
       name: 'Vegas Video Slot',
-      reels: 5, rows: 3, stripLength: 30,
+      reels: 5, rows: 3, stripLength: 30, minMatchCount: 3,
       symbols: [
         { id: 'sym_star', name: 'Star', image: '/images/star.png', isWild: true },
         { id: 'sym_seven', name: 'Seven', image: '/images/seven.png', isWild: false },
@@ -129,7 +129,7 @@ export const TEMPLATES: TemplateInfo[] = [
     reels: 5, rows: 4, paylineCount: 30,
     config: {
       name: 'Mega Slots',
-      reels: 5, rows: 4, stripLength: 36,
+      reels: 5, rows: 4, stripLength: 36, minMatchCount: 3,
       symbols: [
         { id: 'sym_star', name: 'Star', image: '/images/star.png', isWild: true },
         { id: 'sym_seven', name: 'Seven', image: '/images/seven.png', isWild: false },

@@ -27,6 +27,17 @@ export function buildGrid(config: MachineConfig, stops: number[]): string[][] {
 export function evaluatePaylines(config: MachineConfig, grid: string[][], bet: number): WinResult[] {
   const wins: WinResult[] = [];
   const wildIds = new Set(config.symbols.filter(s => s.isWild).map(s => s.id));
+  const minMatch = config.minMatchCount ?? 3;
+
+  // Build a set of symbols eligible for 2-symbol payouts
+  const twoSymbolMap = new Map<string, number>();
+  if (minMatch <= 2) {
+    for (const pt of config.paytable) {
+      if (pt.twoSymbolStrategy?.enabled && pt.twoSymbolStrategy.payout > 0) {
+        twoSymbolMap.set(pt.symbolId, pt.twoSymbolStrategy.payout);
+      }
+    }
+  }
 
   for (const payline of config.paylines) {
     // Extract symbols along this payline
@@ -42,7 +53,6 @@ export function evaluatePaylines(config: MachineConfig, grid: string[][], bet: n
     if (!baseSymbol) {
       // All wilds or empty — check if all are wilds
       if (lineSymbols.every(s => wildIds.has(s) && s !== '')) {
-        // All wilds win — use the highest-paying wild
         const wildPayouts = config.paytable.find(pt => wildIds.has(pt.symbolId));
         if (wildPayouts) {
           const payout = wildPayouts.payouts[lineSymbols.length];
@@ -69,7 +79,7 @@ export function evaluatePaylines(config: MachineConfig, grid: string[][], bet: n
       }
     }
 
-    // Look up payout
+    // Look up payout — check standard payouts first
     const ptEntry = config.paytable.find(pt => pt.symbolId === baseSymbol);
     if (ptEntry) {
       const payout = ptEntry.payouts[matchCount];
@@ -80,7 +90,19 @@ export function evaluatePaylines(config: MachineConfig, grid: string[][], bet: n
           matchCount,
           payout: payout * bet,
         });
+        continue; // Full match found, skip 2-symbol check
       }
+    }
+
+    // Check 2-symbol strategy if match count is 2 and no full payout was found
+    if (matchCount >= 2 && twoSymbolMap.has(baseSymbol)) {
+      const twoPayout = twoSymbolMap.get(baseSymbol)!;
+      wins.push({
+        paylineId: payline.id,
+        symbolId: baseSymbol,
+        matchCount: 2,
+        payout: twoPayout * bet,
+      });
     }
   }
 
