@@ -38,27 +38,58 @@ export function SpotlightOverlay ( { targetSelector, children, onClose }: Spotli
       )`
         : 'none';
 
-    // Position tooltip near the highlighted element
-    const tooltipStyle: React.CSSProperties = rect ? {
+    // Position tooltip near the highlighted element, clamped to viewport
+    const tooltipHeight = 220; // estimated max height of tooltip card
+    const tooltipWidth = 400;
+    const gap = 16;
+
+    const tooltipStyle: React.CSSProperties = {
         position: 'fixed',
-        top: rect.bottom + padding + 16,
-        left: Math.max( 20, Math.min( rect.left, window.innerWidth - 420 ) ),
-        maxWidth: '400px',
-        zIndex: 10001,
-    } : {
-        position: 'fixed',
-        top: '50%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
-        maxWidth: '500px',
+        maxWidth: `${ tooltipWidth }px`,
         zIndex: 10001,
     };
 
-    // If tooltip goes below viewport, place it above the target
-    if ( rect && rect.bottom + 300 > window.innerHeight )
+    if ( rect )
     {
-        tooltipStyle.top = rect.top - padding - 16;
-        tooltipStyle.transform = 'translateY(-100%)';
+        // Horizontal: clamp so tooltip stays within viewport
+        tooltipStyle.left = Math.max( 16, Math.min( rect.left, window.innerWidth - tooltipWidth - 16 ) );
+
+        const spaceBelow = window.innerHeight - rect.bottom - padding - gap;
+        const spaceAbove = rect.top - padding - gap;
+
+        if ( spaceBelow >= tooltipHeight )
+        {
+            // Prefer placing below the target
+            tooltipStyle.top = rect.bottom + padding + gap;
+        }
+        else if ( spaceAbove >= tooltipHeight )
+        {
+            // Place above the target
+            tooltipStyle.top = rect.top - padding - gap - tooltipHeight;
+        }
+        else
+        {
+            // Neither fits — place beside the target or center vertically
+            const centeredTop = Math.max( 16, Math.min(
+                rect.top + rect.height / 2 - tooltipHeight / 2,
+                window.innerHeight - tooltipHeight - 16
+            ) );
+            tooltipStyle.top = centeredTop;
+            // Shift horizontally to the right of the target if possible
+            const rightOfTarget = rect.right + gap;
+            if ( rightOfTarget + tooltipWidth < window.innerWidth - 16 )
+            {
+                tooltipStyle.left = rightOfTarget;
+            }
+        }
+    }
+    else
+    {
+        // No target found — center in viewport
+        tooltipStyle.top = '50%';
+        tooltipStyle.left = '50%';
+        tooltipStyle.transform = 'translate(-50%, -50%)';
+        tooltipStyle.maxWidth = '500px';
     }
 
     return (
