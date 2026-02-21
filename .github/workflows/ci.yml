@@ -66,13 +66,12 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-
-      - name: Install Lighthouse CI
-        run: npm install -g @lhci/cli
+          cache: 'npm'
 
       - name: Run Lighthouse CI
         run: |
-          lhci autorun \
+          # Use npx to avoid global install overhead
+          npx @lhci/cli autorun \
             --collect.staticDistDir=./dist \
             --collect.numberOfRuns=3 \
             --assert.preset=lighthouse:recommended \
