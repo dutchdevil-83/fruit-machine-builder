@@ -119,3 +119,10 @@ jobs:
               issue_number: context.issue.number,
               body,
             });
+            # Add this to the end of the 'lighthouse' job in ci.yml
+      - name: Upload Lighthouse report
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-report
+          path: .lighthouseci/
+          retention-days: 1
