@@ -23,12 +23,12 @@ jobs:
           ref: ${{ github.event.workflow_run.head_branch }}
 
       - name: Download Lighthouse artifact
-        uses: actions/download-artifact@v4
+        uses: dawidd6/action-download-artifact@v2
         with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          run_id: ${{ github.event.workflow_run.id }}
           name: lighthouse-report
           path: .lighthouseci
-          run-id: ${{ github.event.workflow_run.id }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Analyze and Auto-Fix with AI
         uses: actions/github-script@v7
@@ -81,28 +81,51 @@ jobs:
                   temperature: 0.1
                 })
               });
+
+              if (!response.ok) {
+                let errorBody = '';
+                try {
+                  errorBody = await response.text();
+                } catch (e) {
+                  errorBody = '<unable to read error body>';
+                }
+                throw new Error(`Models API request failed with status ${response.status}: ${errorBody}`);
+              }
               
               const aiResult = await response.json();
               if (aiResult.error) throw new Error(aiResult.error.message);
 
+              if (
+                !aiResult ||
+                !Array.isArray(aiResult.choices) ||
+                aiResult.choices.length === 0 ||
+                !aiResult.choices[0].message ||
+                typeof aiResult.choices[0].message.content !== 'string'
+              ) {
+                throw new Error('Unexpected AI response structure: missing choices[0].message.content.');
+              }
               const responseText = aiResult.choices[0].message.content;
               
-              // Clean up markdown code blocks if the AI includes them and ensure it matched
+              // Extract the first JSON object from the AI response (works even if wrapped in markdown code fences)
               const jsonMatch = responseText.match(/\{[\s\S]*\}/);
               if (!jsonMatch) throw new Error('AI response did not contain a valid JSON object.');
               
-              const fixes = JSON.parse(jsonMatch[0]).fixes || [];
+              const parsedResponse = JSON.parse(jsonMatch[0]);
+              const fixes = Array.isArray(parsedResponse.fixes) ? parsedResponse.fixes : [];
               
               fixes.forEach(fix => {
                 const filePath = path.join(process.env.GITHUB_WORKSPACE, fix.file);
                 if (fs.existsSync(filePath)) {
                   let content = fs.readFileSync(filePath, 'utf8');
-                  if (content.includes(fix.search)) {
+                  const occurrences = fix.search ? content.split(fix.search).length - 1 : 0;
+                  if (occurrences === 0) {
+                    console.log(`⚠️ Search string not found in ${fix.file}. AI suggested: ${fix.search}`);
+                  } else if (occurrences === 1) {
                     content = content.replace(fix.search, fix.replace);
                     fs.writeFileSync(filePath, content);
                     console.log(`✅ Fixed: ${fix.file}`);
                   } else {
-                    console.log(`⚠️ Search string not found in ${fix.file}. AI suggested: ${fix.search}`);
+                    console.log(`⚠️ Search string occurred ${occurrences} times in ${fix.file}. Skipping to avoid ambiguous fix. AI suggested: ${fix.search}`);
                   }
                 } else {
                   console.log(`⚠️ File not found: ${fix.file}`);
@@ -119,4 +142,4 @@ jobs:
           commit-message: "fix: automated AI Lighthouse remediation"
           title: "🤖 Auto-fix Lighthouse Issues"
           body: "This PR contains automated fixes for Lighthouse performance and accessibility audits."
-          branch: "ai-lighthouse-fixes"
+          branch: "ai-lighthouse-fixes-${{ github.run_id }}"
