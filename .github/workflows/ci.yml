@@ -9,6 +9,7 @@ on:
 permissions:
   contents: read
   pull-requests: write
+  statuses: write
 
 jobs:
   build-and-test:
@@ -84,7 +85,7 @@ jobs:
           LHCI_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Comment Lighthouse results on PR
-        if: github.event_name == 'pull_request'
+        if: always() && github.event_name == 'pull_request'
         uses: actions/github-script@v7
         with:
           script: |
@@ -119,10 +120,10 @@ jobs:
               issue_number: context.issue.number,
               body,
             });
-            # Add this to the end of the 'lighthouse' job in ci.yml
-      - name: Upload Lighthouse report
+            
+      - name: Upload Lighthouse Report
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: lighthouse-report
-          path: .lighthouseci/
-          retention-days: 1
+          path: .lighthouseci
