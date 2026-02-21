@@ -6,6 +6,9 @@ import { audioEngine } from '../utils/audioEngine';
 import type { SpinResult } from '../types/machine';
 import { PixiReels } from './PixiReels';
 
+import IconPlayCircle from '~icons/lucide/play-circle';
+import IconLoader from '~icons/lucide/loader';
+import IconSlotMachine from '~icons/game-icons/slot-machine';
 export function SimulatorView ()
 {
   const config = useConfigStore( ( s ) => s.config );
@@ -16,6 +19,35 @@ export function SimulatorView ()
   const [ result, setResult ] = useState<SpinResult | null>( null );
   const [ isSpinning, setIsSpinning ] = useState( false );
   const [ message, setMessage ] = useState( 'Press SPIN to play' );
+
+  const iSettings = config.settings.interface || {
+    backgroundType: 'color', backgroundColor: '#1a1a2e', cabinetColor: '#111', glassOverlay: false, buttonStyle: 'classic'
+  };
+
+  const bgStyle: React.CSSProperties = iSettings.backgroundType === 'image' && iSettings.backgroundImageUrl
+    ? { backgroundImage: `url(${ iSettings.backgroundImageUrl })`, backgroundSize: 'cover', backgroundPosition: 'center' }
+    : { backgroundColor: iSettings.backgroundColor };
+
+  const getBtnStyle = ( isSpin: boolean ) =>
+  {
+    let base: React.CSSProperties = {};
+    if ( iSettings.buttonStyle === 'glass' )
+    {
+      base = { background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.2)' };
+    } else if ( iSettings.buttonStyle === 'modern' )
+    {
+      base = { borderRadius: '24px' };
+    } else
+    {
+      base = { borderRadius: '4px' }; // classic
+    }
+
+    if ( isSpin )
+    {
+      return { ...base, minWidth: '140px', fontSize: '1.1rem', background: isSpinning ? 'var(--text-muted)' : ( iSettings.buttonStyle === 'glass' ? 'rgba(255,215,0,0.3)' : undefined ) };
+    }
+    return base;
+  };
 
   const winPaylineIds = new Set( result?.wins.map( w => w.paylineId ) ?? [] );
 
@@ -69,9 +101,11 @@ export function SimulatorView ()
   }, [ config, bet, credits, isSpinning ] );
 
   return (
-    <div className="fade-in" style={ { display: 'flex', flexDirection: 'column', gap: '20px' } }>
-      <div className="panel" style={ { textAlign: 'center' } }>
-        <h2 style={ { marginBottom: '16px' } }>▶️ Live Simulator</h2>
+    <div className="fade-in" style={ { display: 'flex', flexDirection: 'column', gap: '20px', ...bgStyle, padding: '24px', borderRadius: '12px' } }>
+      <div className="panel" style={ { textAlign: 'center', background: 'rgba(20, 20, 30, 0.85)', backdropFilter: 'blur(8px)' } }>
+        <h2 style={ { marginBottom: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' } }>
+          <IconPlayCircle /> Live Simulator
+        </h2>
 
         {/* Credits & bet display */ }
         <div style={ {
@@ -86,10 +120,8 @@ export function SimulatorView ()
 
         {/* Reel grid */ }
         <div style={ {
-          display: 'inline-grid',
-          gridTemplateColumns: `repeat( ${ config.reels }, 80px )`,
-          gap: '6px',
-          background: '#111',
+          display: 'inline-block',
+          background: iSettings.cabinetColor,
           padding: '16px',
           borderRadius: 'var(--radius-lg)',
           border: '3px solid var(--border)',
@@ -102,6 +134,14 @@ export function SimulatorView ()
             isSpinning={ isSpinning }
             winPaylineIds={ winPaylineIds }
           />
+          { iSettings.glassOverlay && (
+            <div style={ {
+              position: 'absolute', inset: 16, pointerEvents: 'none',
+              background: 'linear-gradient(to bottom, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 40%, rgba(0,0,0,0.3) 100%)',
+              boxShadow: 'inset 0 10px 20px rgba(255,255,255,0.1)',
+              borderRadius: '8px'
+            } } />
+          ) }
         </div>
 
         {/* Status message */ }
@@ -122,6 +162,7 @@ export function SimulatorView ()
             className="btn"
             onClick={ () => setBet( Math.max( 1, bet - 1 ) ) }
             disabled={ isSpinning }
+            style={ getBtnStyle( false ) }
           >
             BET −
           </button>
@@ -130,19 +171,16 @@ export function SimulatorView ()
             className="btn btn-primary btn-lg"
             onClick={ doSpin }
             disabled={ isSpinning }
-            style={ {
-              minWidth: '140px',
-              fontSize: '1.1rem',
-              background: isSpinning ? 'var(--text-muted)' : undefined,
-            } }
+            style={ getBtnStyle( true ) }
           >
-            { isSpinning ? '⏳' : '🎰 SPIN' }
+            { isSpinning ? <IconLoader className="spin-anim" /> : <><IconSlotMachine /> SPIN</> }
           </button>
 
           <button
             className="btn"
             onClick={ () => setBet( bet + 1 ) }
             disabled={ isSpinning }
+            style={ getBtnStyle( false ) }
           >
             BET +
           </button>
@@ -150,7 +188,7 @@ export function SimulatorView ()
           <button
             className="btn"
             onClick={ () => setCredits( config.settings.startCredits ) }
-            style={ { marginLeft: '16px' } }
+            style={ { ...getBtnStyle( false ), marginLeft: '16px' } }
           >
             Reset Credits
           </button>

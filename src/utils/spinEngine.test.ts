@@ -13,6 +13,7 @@ const mockConfig: MachineConfig = {
   reels: 3,
   rows: 3,
   stripLength: 10,
+  minMatchCount: 3,
   symbols: defaultSymbols,
   reelStrips: [
     ['sym_cherry', 'sym_bar', 'sym_wild', 'sym_cherry', 'sym_bar', 'sym_cherry', 'sym_bar', 'sym_wild', 'sym_cherry', 'sym_bar'],
@@ -49,6 +50,13 @@ const mockConfig: MachineConfig = {
          winNormal: { enabled: true, type: 'synth', synthPreset: 'coin', volume: 1.0 },
          winBig: { enabled: true, type: 'synth', synthPreset: 'fanfare', volume: 1.0 }
       }
+    },
+    interface: {
+      backgroundType: 'color',
+      backgroundColor: '#1a1a2e',
+      cabinetColor: '#111111',
+      glassOverlay: false,
+      buttonStyle: 'classic',
     }
   },
 };

@@ -74,10 +74,11 @@ export function PixiReels ( { config, result, isSpinning, winPaylineIds }: PixiR
                 const tex = textures.get( symId! ) || PIXI.Texture.WHITE;
                 const sprite = new PIXI.Sprite( tex );
 
+                sprite.anchor.set( 0.5 );
                 sprite.width = 56;
                 sprite.height = 56;
-                sprite.x = 12; // Center in 80px cell
-                sprite.y = i * CELL_SIZE + 12;
+                sprite.x = SYM_SIZE / 2; // Center horizontally
+                sprite.y = i * CELL_SIZE + ( SYM_SIZE / 2 ); // Center vertically
 
                 // Custom property to track what symbol this is
                 ( sprite as any ).symId = symId;
@@ -118,7 +119,7 @@ export function PixiReels ( { config, result, isSpinning, winPaylineIds }: PixiR
                     sprite.texture = textures.get( symId )!;
                     ( sprite as any ).symId = symId;
                 }
-                sprite.y = row * CELL_SIZE + 12;
+                sprite.y = row * CELL_SIZE + ( SYM_SIZE / 2 );
                 sprite.alpha = 1;
             }
             // Hide the extra sprite used for wrapping
@@ -135,6 +136,7 @@ export function PixiReels ( { config, result, isSpinning, winPaylineIds }: PixiR
         if ( !containerRef.current ) return;
 
         let isMounted = true;
+        let isInitialized = false;
         const app = new PIXI.Application();
 
         const initPixi = async () =>
@@ -147,9 +149,14 @@ export function PixiReels ( { config, result, isSpinning, winPaylineIds }: PixiR
                 autoDensity: true,
             } );
 
+            isInitialized = true;
+
             if ( !isMounted )
             {
-                app.destroy( true, { children: true } );
+                try
+                {
+                    app.destroy( true );
+                } catch ( e ) { }
                 return;
             }
 
@@ -236,7 +243,7 @@ export function PixiReels ( { config, result, isSpinning, winPaylineIds }: PixiR
                             sprite.y += state.speed * dt;
 
                             // If moved below the view, wrap to top
-                            const bottomLimit = config.rows * CELL_SIZE + 12;
+                            const bottomLimit = config.rows * CELL_SIZE + ( SYM_SIZE / 2 );
                             if ( sprite.y > bottomLimit )
                             {
                                 sprite.y -= ( config.rows + 1 ) * CELL_SIZE;
@@ -285,14 +292,14 @@ export function PixiReels ( { config, result, isSpinning, winPaylineIds }: PixiR
                 tickerRef.current.destroy();
                 tickerRef.current = null;
             }
-            if ( appRef.current )
+            if ( isInitialized )
             {
-                appRef.current.destroy( true, { children: true } );
-                appRef.current = null;
-            } else
-            {
-                app.destroy( true, { children: true } );
+                try
+                {
+                    app.destroy( true );
+                } catch ( e ) { }
             }
+            appRef.current = null;
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [ config.reels, config.rows, config.symbols ] );

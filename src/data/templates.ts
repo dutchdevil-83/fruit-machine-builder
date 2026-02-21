@@ -17,6 +17,14 @@ const defaultAudio = {
   },
 };
 
+const defaultInterface = {
+  backgroundType: 'color' as const,
+  backgroundColor: '#1a1a2e',
+  cabinetColor: '#111111',
+  glassOverlay: false,
+  buttonStyle: 'classic' as const,
+};
+
 const defaultAnimation = {
   preset: 'elastic', durationMs: 2000, spinSpeed: 30, bounceStrength: 0.5, blurLevel: 5,
 };
@@ -78,7 +86,7 @@ export const TEMPLATES: TemplateInfo[] = [
         { symbolId: 'sym_plum', payouts: { 3: 40 } },
         { symbolId: 'sym_orange', payouts: { 3: 40 } },
       ],
-      settings: { startCredits: 1000, betOptions: [1, 2, 5, 10, 20], defaultBet: 1, animation: defaultAnimation, audio: defaultAudio },
+      settings: { startCredits: 1000, betOptions: [1, 2, 5, 10, 20], defaultBet: 1, animation: defaultAnimation, audio: defaultAudio, interface: defaultInterface },
     },
   },
   {
@@ -119,7 +127,7 @@ export const TEMPLATES: TemplateInfo[] = [
         { symbolId: 'sym_plum', payouts: { 3: 10, 4: 40, 5: 150 } },
         { symbolId: 'sym_orange', payouts: { 3: 10, 4: 40, 5: 150 } },
       ],
-      settings: { startCredits: 5000, betOptions: [1, 5, 10, 25, 50], defaultBet: 1, animation: defaultAnimation, audio: defaultAudio },
+      settings: { startCredits: 5000, betOptions: [1, 5, 10, 25, 50], defaultBet: 1, animation: defaultAnimation, audio: defaultAudio, interface: defaultInterface },
     },
   },
   {
@@ -160,7 +168,7 @@ export const TEMPLATES: TemplateInfo[] = [
         { symbolId: 'sym_plum', payouts: { 3: 15, 4: 60, 5: 250 } },
         { symbolId: 'sym_orange', payouts: { 3: 15, 4: 60, 5: 250 } },
       ],
-      settings: { startCredits: 10000, betOptions: [1, 5, 10, 25, 50, 100], defaultBet: 1, animation: defaultAnimation, audio: defaultAudio },
+      settings: { startCredits: 10000, betOptions: [1, 5, 10, 25, 50, 100], defaultBet: 1, animation: defaultAnimation, audio: defaultAudio, interface: defaultInterface },
     },
   },
 ];

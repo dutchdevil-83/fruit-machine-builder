@@ -85,6 +85,13 @@ function createDefaultConfig (): MachineConfig
                     winNormal: { enabled: true, type: 'synth', synthPreset: 'coin', volume: 1.0 },
                     winBig: { enabled: true, type: 'synth', synthPreset: 'fanfare', volume: 1.0 }
                 }
+            },
+            interface: {
+                backgroundType: 'color',
+                backgroundColor: '#1a1a2e',
+                cabinetColor: '#111111',
+                glassOverlay: false,
+                buttonStyle: 'classic',
             }
         },
     };
@@ -115,8 +122,10 @@ type Action =
     | { type: 'SET_PAYTABLE_ENTRY'; symbolId: string; payouts: Record<number, number> }
     | { type: 'SET_ANIMATION_SETTINGS'; settings: Partial<MachineConfig[ 'settings' ][ 'animation' ]> }
     | { type: 'SET_AUDIO_SETTINGS'; settings: Partial<MachineConfig[ 'settings' ][ 'audio' ]> }
+    | { type: 'SET_INTERFACE_SETTINGS'; settings: Partial<MachineConfig[ 'settings' ][ 'interface' ]> }
     | { type: 'RENAME_SYMBOL'; oldId: string; newId: string }
     | { type: 'IMPORT_CONFIG'; config: MachineConfig }
+    | { type: 'SET_MIN_MATCH_COUNT'; count: number }
     | { type: 'RESET' };
 
 /* ── Reducer ── */
@@ -158,6 +167,9 @@ function configReducer ( state: ConfigState, action: Action ): ConfigState
 
         case 'SET_ROWS':
             return { ...state, config: { ...config, rows: Math.max( 1, action.rows ) } };
+
+        case 'SET_MIN_MATCH_COUNT':
+            return { ...state, config: { ...config, minMatchCount: Math.max( 2, Math.min( action.count, config.reels ) ) } };
 
         case 'SET_STRIP_LENGTH': {
             const len = Math.max( 3, action.length );
@@ -268,6 +280,18 @@ function configReducer ( state: ConfigState, action: Action ): ConfigState
                 }
             };
 
+        case 'SET_INTERFACE_SETTINGS':
+            return {
+                ...state,
+                config: {
+                    ...config,
+                    settings: {
+                        ...config.settings,
+                        interface: { ...config.settings.interface, ...action.settings }
+                    }
+                }
+            };
+
         case 'IMPORT_CONFIG':
             return { ...state, config: action.config };
 
@@ -350,10 +374,12 @@ export interface ConfigStoreAPI
     setPaytableEntry: ( symbolId: string, payouts: Record<number, number> ) => void;
     setAnimationSettings: ( settings: Partial<MachineConfig[ 'settings' ][ 'animation' ]> ) => void;
     setAudioSettings: ( settings: Partial<MachineConfig[ 'settings' ][ 'audio' ]> ) => void;
+    setInterfaceSettings: ( settings: Partial<MachineConfig[ 'settings' ][ 'interface' ]> ) => void;
     renameSymbol: ( oldId: string, newId: string ) => void;
     exportJSON: () => string;
     importJSON: ( json: string ) => boolean;
     resetToDefault: () => void;
+    setMinMatchCount: ( count: number ) => void;
 }
 
 /**
@@ -370,6 +396,7 @@ export function useConfigStore<T> ( selector?: ( store: ConfigStoreAPI ) => T ):
     const setName = useCallback( ( name: string ) => dispatch( { type: 'SET_NAME', name } ), [ dispatch ] );
     const setReels = useCallback( ( count: number ) => dispatch( { type: 'SET_REELS', count } ), [ dispatch ] );
     const setRows = useCallback( ( rows: number ) => dispatch( { type: 'SET_ROWS', rows } ), [ dispatch ] );
+    const setMinMatchCount = useCallback( ( count: number ) => dispatch( { type: 'SET_MIN_MATCH_COUNT', count } ), [ dispatch ] );
     const setStripLength = useCallback( ( length: number ) => dispatch( { type: 'SET_STRIP_LENGTH', length } ), [ dispatch ] );
     const addSymbol = useCallback( ( symbol: SymbolDef ) => dispatch( { type: 'ADD_SYMBOL', symbol } ), [ dispatch ] );
     const updateSymbol = useCallback( ( id: string, updates: Partial<SymbolDef> ) => dispatch( { type: 'UPDATE_SYMBOL', id, updates } ), [ dispatch ] );
@@ -382,6 +409,7 @@ export function useConfigStore<T> ( selector?: ( store: ConfigStoreAPI ) => T ):
     const setPaytableEntry = useCallback( ( symbolId: string, payouts: Record<number, number> ) => dispatch( { type: 'SET_PAYTABLE_ENTRY', symbolId, payouts } ), [ dispatch ] );
     const setAnimationSettings = useCallback( ( settings: Partial<MachineConfig[ 'settings' ][ 'animation' ]> ) => dispatch( { type: 'SET_ANIMATION_SETTINGS', settings } ), [ dispatch ] );
     const setAudioSettings = useCallback( ( settings: Partial<MachineConfig[ 'settings' ][ 'audio' ]> ) => dispatch( { type: 'SET_AUDIO_SETTINGS', settings } ), [ dispatch ] );
+    const setInterfaceSettings = useCallback( ( settings: Partial<MachineConfig[ 'settings' ][ 'interface' ]> ) => dispatch( { type: 'SET_INTERFACE_SETTINGS', settings } ), [ dispatch ] );
     const renameSymbol = useCallback( ( oldId: string, newId: string ) => dispatch( { type: 'RENAME_SYMBOL', oldId, newId } ), [ dispatch ] );
 
     const exportJSON = useCallback( () => JSON.stringify( state.config, null, 2 ), [ state.config ] );
@@ -407,6 +435,7 @@ export function useConfigStore<T> ( selector?: ( store: ConfigStoreAPI ) => T ):
         setName,
         setReels,
         setRows,
+        setMinMatchCount,
         setStripLength,
         addSymbol,
         updateSymbol,
@@ -419,6 +448,7 @@ export function useConfigStore<T> ( selector?: ( store: ConfigStoreAPI ) => T ):
         setPaytableEntry,
         setAnimationSettings,
         setAudioSettings,
+        setInterfaceSettings,
         renameSymbol,
         exportJSON,
         importJSON,

@@ -20,7 +20,10 @@
         "noUnusedLocals": true,
         "noUnusedParameters": true,
         "noFallthroughCasesInSwitch": true,
-        "noUncheckedIndexedAccess": true
+        "noUncheckedIndexedAccess": true,
+        "types": [
+            "unplugin-icons/types/react"
+        ]
     },
     "include": [
         "src"

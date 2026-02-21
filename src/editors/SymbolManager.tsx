@@ -175,6 +175,8 @@ function SymbolCard ( {
               type="text"
               value={ symbol.name }
               onChange={ ( e ) => onNameChange( e.target.value ) }
+              title="Symbol Name"
+              placeholder="e.g. Cherry"
               style={ { flex: 1 } }
             />
           </div>
@@ -183,6 +185,8 @@ function SymbolCard ( {
             <input
               type="checkbox"
               checked={ symbol.isWild }
+              title="Is Wild"
+              placeholder=""
               onChange={ ( e ) => onUpdate( { isWild: e.target.checked } ) }
             />
           </div>

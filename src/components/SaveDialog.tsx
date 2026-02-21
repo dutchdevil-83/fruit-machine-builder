@@ -2,6 +2,9 @@ import { useState } from 'react';
 import { useConfigStore } from '../store/configStore';
 import { useToast } from './Toast';
 
+import IconSave from '~icons/lucide/save';
+import IconDatabase from '~icons/lucide/database';
+import IconDownload from '~icons/lucide/download';
 interface SaveDialogProps
 {
     isOpen: boolean;
@@ -67,7 +70,7 @@ export function SaveDialog ( { isOpen, onClose }: SaveDialogProps )
                 maxWidth: '90vw',
                 boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
             } }>
-                <h3 style={ { marginBottom: '16px' } }>💾 Save Machine</h3>
+                <h3 style={ { marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' } }><IconSave /> Save Machine</h3>
 
                 {/* Name input */ }
                 <div style={ { display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '16px' } }>
@@ -76,6 +79,8 @@ export function SaveDialog ( { isOpen, onClose }: SaveDialogProps )
                         type="text"
                         value={ saveName }
                         onChange={ ( e ) => setSaveName( e.target.value ) }
+                        title="Preset Name"
+                        placeholder="Enter preset name"
                         style={ { padding: '8px 12px', borderRadius: '6px', border: '1px solid var(--border)', background: 'var(--bg-input)', color: 'var(--text-primary)', fontSize: '0.9rem' } }
                         autoFocus
                     />
@@ -90,14 +95,14 @@ export function SaveDialog ( { isOpen, onClose }: SaveDialogProps )
                             onClick={ () => setStorageType( 'internal' ) }
                             style={ { flex: 1, fontSize: '0.85rem' } }
                         >
-                            🗄️ Browser Storage
+                            <IconDatabase /> Browser Storage
                         </button>
                         <button
                             className={ storageType === 'external' ? 'btn btn-primary' : 'btn' }
                             onClick={ () => setStorageType( 'external' ) }
                             style={ { flex: 1, fontSize: '0.85rem' } }
                         >
-                            📁 Download File
+                            <IconDownload /> Download File
                         </button>
                     </div>
                     <p style={ { fontSize: '0.75rem', color: 'var(--text-muted)', margin: 0 } }>
@@ -115,7 +120,7 @@ export function SaveDialog ( { isOpen, onClose }: SaveDialogProps )
                         onClick={ handleSave }
                         disabled={ !saveName.trim() }
                     >
-                        { storageType === 'internal' ? '💾 Save' : '📥 Export' }
+                        { storageType === 'internal' ? <><IconSave /> Save</> : <><IconDownload /> Export</> }
                     </button>
                 </div>
             </div>

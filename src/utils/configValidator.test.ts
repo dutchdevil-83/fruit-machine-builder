@@ -8,6 +8,7 @@ function createValidConfig(): MachineConfig {
     reels: 3,
     rows: 3,
     stripLength: 12,
+    minMatchCount: 3,
     symbols: [
       { id: 'a', name: 'A', image: '/a.png', isWild: false },
       { id: 'b', name: 'B', image: '/b.png', isWild: false },
@@ -38,6 +39,13 @@ function createValidConfig(): MachineConfig {
           winNormal: { enabled: true, type: 'synth', synthPreset: 'coin', volume: 1.0 },
           winBig: { enabled: true, type: 'synth', synthPreset: 'fanfare', volume: 1.0 },
         },
+      },
+      interface: {
+        backgroundType: 'color',
+        backgroundColor: '#1a1a2e',
+        cabinetColor: '#111111',
+        glassOverlay: false,
+        buttonStyle: 'classic',
       },
     },
   };

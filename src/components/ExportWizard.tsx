@@ -2,6 +2,11 @@ import { useState, useMemo } from 'react';
 import { useConfigStore } from '../store/configStore';
 import { detectCorporateDevice } from '../utils/deviceDetector';
 
+import IconPackage from '~icons/lucide/package';
+import IconGlobe from '~icons/lucide/globe';
+import IconMonitor from '~icons/lucide/monitor';
+import IconLock from '~icons/lucide/lock';
+import IconPartyPopper from '~icons/lucide/party-popper';
 type ExportFormat = 'web' | 'exe';
 type WizardStep = 'format' | 'device-check' | 'building' | 'done';
 
@@ -56,7 +61,7 @@ export function ExportWizard ( { onClose }: { onClose: () => void } )
             } }>
                 { step === 'format' && (
                     <>
-                        <h3 style={ { marginBottom: '16px' } }>📦 Export Your Machine</h3>
+                        <h3 style={ { marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' } }><IconPackage /> Export Your Machine</h3>
                         <p style={ { fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '20px' } }>
                             Choose how you want to export your fruit machine.
                         </p>
@@ -69,7 +74,7 @@ export function ExportWizard ( { onClose }: { onClose: () => void } )
                             } }>
                                 <input type="radio" name="format" checked={ format === 'web' } onChange={ () => setFormat( 'web' ) } />
                                 <div>
-                                    <strong>🌐 Web ZIP</strong>
+                                    <strong style={ { display: 'flex', alignItems: 'center', gap: '6px' } }><IconGlobe /> Web ZIP</strong>
                                     <p style={ { fontSize: '0.8rem', color: 'var(--text-muted)', margin: '4px 0 0' } }>
                                         Export as a web application. Open in any browser. No installation needed.
                                     </p>
@@ -83,7 +88,7 @@ export function ExportWizard ( { onClose }: { onClose: () => void } )
                             } }>
                                 <input type="radio" name="format" checked={ format === 'exe' } onChange={ () => setFormat( 'exe' ) } />
                                 <div>
-                                    <strong>💻 Desktop EXE</strong>
+                                    <strong style={ { display: 'flex', alignItems: 'center', gap: '6px' } }><IconMonitor /> Desktop EXE</strong>
                                     <p style={ { fontSize: '0.8rem', color: 'var(--text-muted)', margin: '4px 0 0' } }>
                                         Windows executable via Electron. Requires build tools.
                                     </p>
@@ -100,7 +105,7 @@ export function ExportWizard ( { onClose }: { onClose: () => void } )
 
                 { step === 'device-check' && (
                     <>
-                        <h3 style={ { marginBottom: '16px' } }>🔒 Device Security Check</h3>
+                        <h3 style={ { marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' } }><IconLock /> Device Security Check</h3>
 
                         { deviceCheck.status === 'managed' ? (
                             <div style={ {
@@ -165,7 +170,7 @@ export function ExportWizard ( { onClose }: { onClose: () => void } )
                 { step === 'done' && (
                     <>
                         <div style={ { textAlign: 'center', padding: '20px 0' } }>
-                            <span style={ { fontSize: '3rem' } }>🎉</span>
+                            <span style={ { fontSize: '3rem', display: 'block', margin: '0 auto', color: 'var(--accent)' } }><IconPartyPopper style={ { width: '48px', height: '48px' } } /></span>
                             <h3 style={ { marginTop: '12px' } }>Export Complete!</h3>
                             { format === 'web' ? (
                                 <p style={ { fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '8px' } }>

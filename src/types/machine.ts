@@ -72,12 +72,22 @@ export interface AudioSettings {
   };
 }
 
+export interface InterfaceSettings {
+  backgroundType: 'color' | 'image';
+  backgroundColor: string;
+  backgroundImageUrl?: string;
+  cabinetColor: string;
+  glassOverlay: boolean;
+  buttonStyle: 'classic' | 'modern' | 'glass';
+}
+
 export interface GameSettings {
   startCredits: number;
   betOptions: number[];
   defaultBet: number;
   animation: AnimationSettings;
   audio: AudioSettings;
+  interface: InterfaceSettings;
 }
 
 /** Result of a single spin */
@@ -103,5 +113,6 @@ export type EditorTab =
   | 'paylines'
   | 'animation'
   | 'audio'
+  | 'interface'
   | 'simulator'
   | 'statistics';

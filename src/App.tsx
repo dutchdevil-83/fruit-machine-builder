@@ -7,6 +7,7 @@ import { PaytableEditor } from './editors/PaytableEditor';
 import { PaylineEditor } from './editors/PaylineEditor';
 import { AnimationConfig } from './editors/AnimationConfig';
 import { AudioConfig } from './editors/AudioConfig';
+import { InterfaceDesigner } from './editors/InterfaceDesigner';
 import { StatsDashboard } from './editors/StatsDashboard';
 import { SimulatorView } from './simulator/SimulatorView';
 import { validateConfig } from './utils/configValidator';
@@ -14,26 +15,44 @@ import { OnboardingWizard } from './components/OnboardingWizard';
 import { HelpPanel } from './components/HelpPanel';
 import { ExportWizard } from './components/ExportWizard';
 import { SaveDialog } from './components/SaveDialog';
+import { AITranslator } from './components/AITranslator';
 import { useTranslation } from './i18n/I18nProvider';
 import { useTheme } from './themes/ThemeProvider';
+import enLocale from './locales/en.json';
 import type { EditorTab } from './types/machine';
-import type { ValidationStatus } from './utils/configValidator';
 
-const STATUS_ICONS: Record<ValidationStatus, string> = { valid: '✅', warning: '⚠️', error: '❌' };
+import IconSlotMachine from '~icons/game-icons/slot-machine';
+import IconCherries from '~icons/game-icons/cherries'; // Game-icons often uses plural, fallback to game-icons
+import IconDice from '~icons/game-icons/rolling-dices';
+import IconCoins from '~icons/game-icons/coins';
+import IconRuler from '~icons/lucide/baseline';
+import IconFilm from '~icons/lucide/film';
+import IconMusic from '~icons/lucide/music';
+import IconPalette from '~icons/lucide/palette';
+import IconPlay from '~icons/lucide/play';
+import IconBarChart from '~icons/lucide/bar-chart-2';
+import IconSave from '~icons/lucide/save';
+import IconDownload from '~icons/lucide/download';
+import IconUpload from '~icons/lucide/upload';
+import IconLanguages from '~icons/lucide/languages';
+import IconFolderOpen from '~icons/lucide/folder-open';
+import IconBot from '~icons/lucide/bot';
+
 const TAB_VAL_MAP: Partial<Record<EditorTab, 'symbols' | 'reels' | 'paylines' | 'paytable' | 'settings'>> = {
   config: 'settings', symbols: 'symbols', reels: 'reels', paylines: 'paylines', paytable: 'paytable',
 };
 
-const NAV_ITEMS: { tab: EditorTab; icon: string; label: string }[] = [
-  { tab: 'config', icon: '⚙️', label: 'Machine Config' },
-  { tab: 'symbols', icon: '🎨', label: 'Symbols' },
-  { tab: 'reels', icon: '🎰', label: 'Reel Strips' },
-  { tab: 'paytable', icon: '💰', label: 'Paytable' },
-  { tab: 'paylines', icon: '📐', label: 'Paylines' },
-  { tab: 'animation', icon: '🎬', label: 'Animation' },
-  { tab: 'audio', icon: '🎵', label: 'Audio' },
-  { tab: 'simulator', icon: '▶️', label: 'Simulator' },
-  { tab: 'statistics', icon: '📊', label: 'Statistics' },
+const NAV_ITEMS: { tab: EditorTab; icon: React.ReactNode; label: string }[] = [
+  { tab: 'config', icon: <IconSlotMachine />, label: 'Machine Config' },
+  { tab: 'symbols', icon: <IconCherries />, label: 'Symbols' },
+  { tab: 'reels', icon: <IconDice />, label: 'Reel Strips' },
+  { tab: 'paytable', icon: <IconCoins />, label: 'Paytable' },
+  { tab: 'paylines', icon: <IconRuler />, label: 'Paylines' },
+  { tab: 'animation', icon: <IconFilm />, label: 'Animation' },
+  { tab: 'audio', icon: <IconMusic />, label: 'Audio' },
+  { tab: 'interface', icon: <IconPalette />, label: 'Interface Design' },
+  { tab: 'simulator', icon: <IconPlay />, label: 'Simulator' },
+  { tab: 'statistics', icon: <IconBarChart />, label: 'Statistics' },
 ];
 
 function App ()
@@ -75,7 +94,7 @@ function App ()
               border: `1px solid ${ validation.overall === 'valid' ? '#2ecc71' : validation.overall === 'warning' ? '#f1c40f' : '#e74c3c' }`,
             } }
           >
-            { STATUS_ICONS[ validation.overall ] } { validation.overall === 'valid' ? 'Ready' : 'Issues' }
+            { validation.overall === 'valid' ? 'Ready' : 'Issues' }
           </span>
         </div>
         <div style={ { display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' } }>
@@ -92,10 +111,10 @@ function App ()
       <nav className="app-sidebar">
         <div className="nav-section">
           <div className="nav-section-title">Design</div>
-          { NAV_ITEMS.slice( 0, 7 ).map( ( item ) =>
+          { NAV_ITEMS.slice( 0, 8 ).map( ( item ) =>
           {
             const catKey = TAB_VAL_MAP[ item.tab ];
-            const badge = catKey ? STATUS_ICONS[ validation.categories[ catKey ].status ] : '';
+            const badge = catKey ? ( validation.categories[ catKey ].status === 'error' ? '!' : '' ) : '';
             return (
               <div
                 key={ item.tab }
@@ -112,7 +131,7 @@ function App ()
         </div>
         <div className="nav-section">
           <div className="nav-section-title">Test</div>
-          { NAV_ITEMS.slice( 7 ).map( ( item ) => (
+          { NAV_ITEMS.slice( 8 ).map( ( item ) => (
             <div
               key={ item.tab }
               className={ `nav-item ${ activeTab === item.tab ? 'active' : '' }` }
@@ -153,6 +172,7 @@ function renderEditor ( tab: EditorTab )
     case 'paylines': return <PaylineEditor />;
     case 'animation': return <AnimationConfig />;
     case 'audio': return <AudioConfig />;
+    case 'interface': return <InterfaceDesigner />;
     case 'simulator': return <SimulatorView />;
     case 'statistics': return <StatsDashboard />;
     default: return null;
@@ -164,7 +184,9 @@ function ExportButton ()
   const [ showWizard, setShowWizard ] = useState( false );
   return (
     <>
-      <button className="btn" onClick={ () => setShowWizard( true ) }>📦 Export</button>
+      <button className="btn btn-icon" onClick={ () => setShowWizard( true ) } title="Export Machine">
+        <IconDownload />
+      </button>
       { showWizard && <ExportWizard onClose={ () => setShowWizard( false ) } /> }
     </>
   );
@@ -190,8 +212,8 @@ function ImportButton ()
   }, [ importJSON ] );
 
   return (
-    <button className="btn" onClick={ handleImport }>
-      📂 Open JSON
+    <button className="btn btn-icon" onClick={ handleImport } title="Import Config JSON">
+      <IconUpload />
     </button>
   );
 }
@@ -201,7 +223,9 @@ function SaveButton ()
   const [ showDialog, setShowDialog ] = useState( false );
   return (
     <>
-      <button className="btn" onClick={ () => setShowDialog( true ) }>💾 Save</button>
+      <button className="btn btn-icon btn-primary" onClick={ () => setShowDialog( true ) } title="Save Machine">
+        <IconSave />
+      </button>
       <SaveDialog isOpen={ showDialog } onClose={ () => setShowDialog( false ) } />
     </>
   );
@@ -239,7 +263,8 @@ function PresetManager ()
   };
 
   return (
-    <div style={ { display: 'flex', gap: '8px', alignItems: 'center', background: 'var(--bg-input)', padding: '4px', borderRadius: '4px' } }>
+    <div style={ { display: 'flex', gap: '4px', alignItems: 'center', background: 'var(--bg-input)', padding: '4px', borderRadius: '4px', marginLeft: '8px' } }>
+      <IconFolderOpen style={ { color: 'var(--text-muted)' } } />
       <select
         title="Saved Presets"
         className="input"
@@ -247,10 +272,12 @@ function PresetManager ()
         value={ selected }
         onChange={ ( e ) => setSelected( e.target.value ) }
       >
-        <option value="" disabled>Saved Presets</option>
+        <option value="" disabled>Presets...</option>
         { presets.map( p => <option key={ p } value={ p }>{ p }</option> ) }
       </select>
-      <button className="btn" style={ { padding: '6px 12px' } } onClick={ loadPreset } disabled={ !selected }>Load</button>
+      <button className="btn btn-icon" onClick={ loadPreset } disabled={ !selected } title="Load Preset">
+        <IconFolderOpen />
+      </button>
     </div>
   );
 }
@@ -258,34 +285,51 @@ function PresetManager ()
 function LanguageSelector ()
 {
   const { locale, setLocale, availableLocales, languageName, browserLanguage, isBrowserLanguageAvailable } = useTranslation();
+  const [ showTranslator, setShowTranslator ] = useState( false );
+
   return (
-    <div style={ { display: 'flex', alignItems: 'center', gap: '4px' } }>
-      <select
-        title="Language"
-        className="input"
-        style={ { padding: '4px 8px', fontSize: '0.8rem' } }
-        value={ locale }
-        onChange={ ( e ) => setLocale( e.target.value ) }
-      >
-        { availableLocales.map( code => (
-          <option key={ code } value={ code }>{ languageName( code ) }</option>
-        ) ) }
-      </select>
-      { !isBrowserLanguageAvailable && (
-        <span
-          style={ {
-            fontSize: '0.7rem',
-            color: 'var(--accent)',
-            cursor: 'pointer',
-            textDecoration: 'underline',
-            whiteSpace: 'nowrap',
-          } }
-          title={ `Your browser language (${ browserLanguage }) isn't available yet` }
+    <>
+      <div style={ { display: 'flex', alignItems: 'center', gap: '4px' } }>
+        <IconLanguages style={ { color: 'var(--text-muted)' } } />
+        <select
+          title="Language"
+          className="input"
+          style={ { padding: '4px 8px', fontSize: '0.8rem' } }
+          value={ locale }
+          onChange={ ( e ) => setLocale( e.target.value ) }
         >
-          🌐 Help translate?
-        </span>
-      ) }
-    </div>
+          { availableLocales.map( code => (
+            <option key={ code } value={ code }>{ languageName( code ) }</option>
+          ) ) }
+        </select>
+
+        <button
+          className="btn btn-icon"
+          onClick={ () => setShowTranslator( true ) }
+          title="Open AI Translator"
+        >
+          <IconBot />
+        </button>
+
+        { !isBrowserLanguageAvailable && (
+          <span
+            style={ {
+              fontSize: '0.7rem',
+              color: 'var(--accent)',
+              cursor: 'pointer',
+              textDecoration: 'underline',
+              whiteSpace: 'nowrap',
+              marginLeft: '4px'
+            } }
+            onClick={ () => setShowTranslator( true ) }
+            title={ `Your browser language (${ browserLanguage }) isn't available yet` }
+          >
+            Translate?
+          </span>
+        ) }
+      </div>
+      <AITranslator isOpen={ showTranslator } onClose={ () => setShowTranslator( false ) } sourceLocale={ enLocale } />
+    </>
   );
 }
 

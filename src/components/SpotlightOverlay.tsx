@@ -5,9 +5,10 @@ interface SpotlightOverlayProps
     targetSelector: string;
     children: React.ReactNode;
     onClose: () => void;
+    onBackdropClick?: () => void;
 }
 
-export function SpotlightOverlay ( { targetSelector, children, onClose }: SpotlightOverlayProps )
+export function SpotlightOverlay ( { targetSelector, children, onClose, onBackdropClick }: SpotlightOverlayProps )
 {
     const [ rect, setRect ] = useState<DOMRect | null>( null );
     const overlayRef = useRef<HTMLDivElement>( null );
@@ -97,7 +98,7 @@ export function SpotlightOverlay ( { targetSelector, children, onClose }: Spotli
             {/* Backdrop with cutout */ }
             <div
                 ref={ overlayRef }
-                onClick={ onClose }
+                onClick={ onBackdropClick || onClose }
                 style={ {
                     position: 'fixed',
                     inset: 0,
@@ -109,7 +110,7 @@ export function SpotlightOverlay ( { targetSelector, children, onClose }: Spotli
             />
 
             {/* Tooltip card */ }
-            <div style={ tooltipStyle }>
+            <div style={ { ...tooltipStyle, transition: 'all 0.4s cubic-bezier(0.25, 1, 0.5, 1)' } }>
                 <div style={ {
                     background: 'var(--bg-card, #1e1e2e)',
                     border: '2px solid var(--accent, #6c63ff)',

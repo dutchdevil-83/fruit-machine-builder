@@ -2,17 +2,26 @@ import { useState, useCallback, useEffect } from 'react';
 import { SpotlightOverlay } from './SpotlightOverlay';
 import { useConfigStore } from '../store/configStore';
 
+import IconSlotMachine from '~icons/game-icons/slot-machine';
+import IconSettings from '~icons/lucide/settings';
+import IconPalette from '~icons/lucide/palette';
+import IconCoins from '~icons/game-icons/coins';
+import IconRuler from '~icons/lucide/baseline';
+import IconPlay from '~icons/lucide/play';
+import IconSave from '~icons/lucide/save';
+
 interface WizardStep
 {
-    title: string;
+    title: React.ReactNode;
     description: string;
     targetSelector: string;
     targetTab?: string;
+    autoAdvance?: boolean;
 }
 
 const STEPS: WizardStep[] = [
     {
-        title: 'Welcome to Fruit Machine Builder! 🎰',
+        title: <span style={ { display: 'flex', alignItems: 'center', gap: '8px' } }>Welcome to Fruit Machine Builder! <IconSlotMachine /></span>,
         description: 'This tool lets you design, configure, and test your own custom slot machine. We\'ll walk you through each step. Click "Next" to begin!',
         targetSelector: '.app-header h1',
     },
@@ -22,44 +31,50 @@ const STEPS: WizardStep[] = [
         targetSelector: '.app-sidebar',
     },
     {
-        title: 'Step 2: Machine Config ⚙️',
-        description: 'Start here. Set the number of reels (columns), rows (visible symbols), and reel strip length. A classic fruit machine is 3×3.',
+        title: <span style={ { display: 'flex', alignItems: 'center', gap: '8px' } }>Step 2: Machine Config <IconSettings /></span>,
+        description: 'Start here. Set the number of reels (columns), rows (visible symbols), and reel strip length. Click the highlighted tab to proceed.',
         targetSelector: '.nav-item',
         targetTab: 'config',
+        autoAdvance: true,
     },
     {
-        title: 'Step 3: Symbols 🎨',
-        description: 'Create your symbols — the images that appear on the reels. Upload custom graphics, name each symbol, and mark one as "Wild" (substitutes for any symbol).',
-        targetSelector: '.nav-item:nth-child(2)',
-        targetTab: 'symbols',
-    },
-    {
-        title: 'Step 4: Reel Strips 🎰',
-        description: 'Design the sequence of symbols on each reel. Drag symbols from the palette onto each reel strip. More copies of a symbol = higher frequency.',
+        title: <span style={ { display: 'flex', alignItems: 'center', gap: '8px' } }>Step 3: Symbols <IconPalette /></span>,
+        description: 'Create your symbols — the images that appear on the reels. Click "Symbols" to proceed.',
         targetSelector: '.nav-item:nth-child(3)',
-        targetTab: 'reels',
+        targetTab: 'symbols',
+        autoAdvance: true,
     },
     {
-        title: 'Step 5: Paytable 💰',
-        description: 'Set how much each symbol pays when matched. Define payouts for 3-of-a-kind (or more on 5-reel machines).',
+        title: <span style={ { display: 'flex', alignItems: 'center', gap: '8px' } }>Step 4: Reel Strips <IconSlotMachine /></span>,
+        description: 'Design the sequence of symbols on each reel. Drag symbols from the palette. Click "Reel Strips" to proceed.',
         targetSelector: '.nav-item:nth-child(4)',
-        targetTab: 'paytable',
+        targetTab: 'reels',
+        autoAdvance: true,
     },
     {
-        title: 'Step 6: Paylines 📐',
-        description: 'Define the winning paths across your reels. Click cells to create patterns. Use "Generate Standard" for common layouts.',
+        title: <span style={ { display: 'flex', alignItems: 'center', gap: '8px' } }>Step 5: Paytable <IconCoins /></span>,
+        description: 'Set how much each symbol pays when matched. Click "Paytable" to proceed.',
         targetSelector: '.nav-item:nth-child(5)',
+        targetTab: 'paytable',
+        autoAdvance: true,
+    },
+    {
+        title: <span style={ { display: 'flex', alignItems: 'center', gap: '8px' } }>Step 6: Paylines <IconRuler /></span>,
+        description: 'Define the winning paths across your reels. Use "Generate Standard" for common layouts. Click "Paylines".',
+        targetSelector: '.nav-item:nth-child(6)',
         targetTab: 'paylines',
+        autoAdvance: true,
     },
     {
-        title: 'Step 7: Test Your Machine! ▶️',
-        description: 'Head to the Simulator tab to spin your machine live. Check the Statistics tab to verify your RTP over millions of spins.',
-        targetSelector: '.nav-section:nth-child(2)',
+        title: <span style={ { display: 'flex', alignItems: 'center', gap: '8px' } }>Step 7: Test Your Machine! <IconPlay /></span>,
+        description: 'Head to the Simulator tab to spin your machine live! Click "Simulator" to proceed.',
+        targetSelector: '.nav-item:nth-child(10)',
         targetTab: 'simulator',
+        autoAdvance: true,
     },
     {
-        title: 'Step 8: Save & Export 💾',
-        description: 'Save your machine as a preset, export the JSON config, or build a standalone package. You can also import configs from other creators.',
+        title: <span style={ { display: 'flex', alignItems: 'center', gap: '8px' } }>Step 8: Save & Export <IconSave /></span>,
+        description: 'Save your machine as a preset, export the JSON config, or build a standalone package. You\'ve mastered the basics!',
         targetSelector: '.app-header',
     },
 ];
@@ -70,6 +85,7 @@ export function OnboardingWizard ()
 {
     const [ step, setStep ] = useState( 0 );
     const [ isActive, setIsActive ] = useState( false );
+    const [ hint, setHint ] = useState<string | null>( null );
     const setActiveTab = useConfigStore( ( s ) => s.setActiveTab );
 
     // Auto-trigger on first visit
@@ -142,13 +158,52 @@ export function OnboardingWizard ()
         );
     }
 
+    // Auto-advance observer
+    useEffect( () =>
+    {
+        if ( !isActive ) return;
+        const current = STEPS[ step ];
+        if ( !current?.autoAdvance ) return;
+
+        const handleGlobalClick = ( e: MouseEvent ) =>
+        {
+            const targetEl = document.querySelector( current.targetSelector );
+            if ( targetEl && targetEl.contains( e.target as Node ) )
+            {
+                // Interacted with target, auto advance
+                setHint( null );
+                setTimeout( () =>
+                {
+                    handleNext();
+                }, 50 ); // slight delay
+            }
+        };
+
+        document.addEventListener( 'click', handleGlobalClick, true );
+        return () => document.removeEventListener( 'click', handleGlobalClick, true );
+    }, [ isActive, step, handleNext ] );
+
+    const handleBackdropClick = useCallback( () =>
+    {
+        setHint( "👉 Please interact with the highlighted area or click 'Next'." );
+        setTimeout( () => setHint( null ), 3000 );
+    }, [] );
+
     const current = STEPS[ step ]!;
 
     return (
         <SpotlightOverlay
             targetSelector={ current.targetSelector }
             onClose={ handleSkip }
+            onBackdropClick={ handleBackdropClick }
         >
+            <style>{ `
+                @keyframes fmb-shake {
+                    0%, 100% { transform: translateX(0); }
+                    25% { transform: translateX(-5px); }
+                    75% { transform: translateX(5px); }
+                }
+            `}</style>
             <div style={ { display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' } }>
                 <span style={ { fontSize: '0.7rem', color: 'var(--text-muted)' } }>
                     { step + 1 } / { STEPS.length }
@@ -162,6 +217,21 @@ export function OnboardingWizard ()
             <p style={ { fontSize: '0.9rem', lineHeight: 1.6, color: 'var(--text-secondary)', marginBottom: '16px' } }>
                 { current.description }
             </p>
+
+            { hint && (
+                <div style={ {
+                    marginBottom: '16px',
+                    padding: '8px 12px',
+                    background: 'rgba(231, 76, 60, 0.15)',
+                    border: '1px solid var(--danger)',
+                    borderRadius: 'var(--radius-sm)',
+                    color: 'var(--danger)',
+                    fontSize: '0.85rem',
+                    animation: 'fmb-shake 0.4s ease',
+                } }>
+                    { hint }
+                </div>
+            ) }
 
             <div style={ { display: 'flex', gap: '8px', justifyContent: 'space-between' } }>
                 <button

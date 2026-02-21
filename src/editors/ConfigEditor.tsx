@@ -7,6 +7,7 @@ export function ConfigEditor ()
   const setName = useConfigStore( ( s ) => s.setName );
   const setReels = useConfigStore( ( s ) => s.setReels );
   const setRows = useConfigStore( ( s ) => s.setRows );
+  const setMinMatchCount = useConfigStore( ( s ) => s.setMinMatchCount );
   const setStripLength = useConfigStore( ( s ) => s.setStripLength );
   const resetToDefault = useConfigStore( ( s ) => s.resetToDefault );
 
@@ -27,6 +28,8 @@ export function ConfigEditor ()
               type="text"
               value={ config.name }
               onChange={ ( e ) => setName( e.target.value ) }
+              title="Machine Name"
+              placeholder="e.g. Classic Slots"
               style={ { width: '100%' } }
             />
           </FieldGroup>
@@ -37,6 +40,8 @@ export function ConfigEditor ()
               min={ 1 }
               value={ config.reels }
               onChange={ ( e ) => setReels( Number( e.target.value ) ) }
+              title="Number of Reels"
+              placeholder="3"
               style={ { width: '100%' } }
             />
           </FieldGroup>
@@ -47,6 +52,21 @@ export function ConfigEditor ()
               min={ 1 }
               value={ config.rows }
               onChange={ ( e ) => setRows( Number( e.target.value ) ) }
+              title="Visible Rows"
+              placeholder="3"
+              style={ { width: '100%' } }
+            />
+          </FieldGroup>
+
+          <FieldGroup label="Min Match Count">
+            <input
+              type="number"
+              min={ 2 }
+              max={ config.reels }
+              value={ config.minMatchCount ?? 3 }
+              onChange={ ( e ) => setMinMatchCount( Number( e.target.value ) ) }
+              title="Minimum adjacent symbols on a payline needed for a win (usually 3 or 2)"
+              placeholder="3"
               style={ { width: '100%' } }
             />
           </FieldGroup>
@@ -57,6 +77,8 @@ export function ConfigEditor ()
               min={ 3 }
               value={ config.stripLength }
               onChange={ ( e ) => setStripLength( Number( e.target.value ) ) }
+              title="Strip Length"
+              placeholder="10"
               style={ { width: '100%' } }
             />
           </FieldGroup>
