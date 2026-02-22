@@ -9,10 +9,7 @@ on:
 permissions:
   contents: read
   pull-requests: write
-<<<<<<< HEAD
-=======
   statuses: write
->>>>>>> 6475a246992bd27f9f20455eefde5e5bd8135689
 
 jobs:
   build-and-test:
@@ -60,43 +57,23 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-<<<<<<< HEAD
-=======
       - name: Download build artifact
         uses: actions/download-artifact@v4
         with:
           name: dist-build
           path: dist/
 
->>>>>>> 6475a246992bd27f9f20455eefde5e5bd8135689
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: 'npm'
 
-<<<<<<< HEAD
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build production bundle
-        run: npm run build
-
-      - name: Install Lighthouse CI
-        run: npm install -g @lhci/cli
-
-      - name: Run Lighthouse CI
-        run: |
-          lhci autorun \
-            --collect.staticDistDir=./dist \
-            --collect.url=http://localhost/app.html \
-=======
       - name: Run Lighthouse CI
         run: |
           # Use npx to avoid global install overhead
           npx @lhci/cli autorun \
             --collect.staticDistDir=./dist \
->>>>>>> 6475a246992bd27f9f20455eefde5e5bd8135689
             --collect.numberOfRuns=3 \
             --assert.preset=lighthouse:recommended \
             --assert.assertions.categories:performance=off \
@@ -108,11 +85,7 @@ jobs:
           LHCI_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Comment Lighthouse results on PR
-<<<<<<< HEAD
-        if: github.event_name == 'pull_request'
-=======
         if: always() && github.event_name == 'pull_request'
->>>>>>> 6475a246992bd27f9f20455eefde5e5bd8135689
         uses: actions/github-script@v7
         with:
           script: |
@@ -147,24 +120,6 @@ jobs:
               issue_number: context.issue.number,
               body,
             });
-<<<<<<< HEAD
-
-  copilot-review:
-    runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
-    permissions:
-      contents: read
-      pull-requests: write
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: GitHub Copilot Code Review
-        uses: github/copilot-code-review-action@v1
-        with:
-          model: gpt-4o
-=======
             
       - name: Upload Lighthouse Report
         if: always()
@@ -172,4 +127,3 @@ jobs:
         with:
           name: lighthouse-report
           path: .lighthouseci
->>>>>>> 6475a246992bd27f9f20455eefde5e5bd8135689
