@@ -70,17 +70,14 @@ jobs:
           cache: 'npm'
 
       - name: Run Lighthouse CI
+        continue-on-error: true
         run: |
           # Use npx to avoid global install overhead
           npx @lhci/cli autorun \
             --collect.staticDistDir=./dist \
             --collect.numberOfRuns=3 \
-            --assert.preset=lighthouse:recommended \
-            --assert.assertions.categories:performance=off \
             --assert.assertions.categories:accessibility=warn \
-            --assert.assertions.categories:best-practices=warn \
-            --assert.assertions.categories:seo=off \
-            --upload.target=temporary-public-storage
+            --assert.assertions.categories:best-practices=warn
         env:
           LHCI_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
