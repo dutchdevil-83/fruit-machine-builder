@@ -22,7 +22,7 @@ import enLocale from './locales/en.json';
 import type { EditorTab } from './types/machine';
 
 import IconSlotMachine from '~icons/game-icons/slot-machine';
-import IconCherries from '~icons/game-icons/cherries'; // Game-icons often uses plural, fallback to game-icons
+import IconCherries from '~icons/game-icons/cherry';
 import IconDice from '~icons/game-icons/rolling-dices';
 import IconCoins from '~icons/game-icons/coins';
 import IconRuler from '~icons/lucide/baseline';
