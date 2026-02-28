@@ -125,18 +125,16 @@ jobs:
           name: lighthouse-report
           path: .lighthouseci
 
-  copilot-review:
-    runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
-    permissions:
-      contents: read
-      pull-requests: write
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: GitHub Copilot Code Review
-        uses: github/copilot-code-review-action@v1
-        with:
-          model: gpt-4o
+#   copilot-review:
+#     runs-on: ubuntu-latest
+#     if: github.event_name == 'pull_request'
+#     permissions:
+#       contents: read
+#       pull-requests: write
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v4
+#       - name: GitHub Copilot Code Review
+#         uses: github/copilot-code-review-action@v1
+#         with:
+#           model: gpt-4o
