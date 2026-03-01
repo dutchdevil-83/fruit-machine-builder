@@ -30,7 +30,7 @@ import IconFilm from '~icons/lucide/film';
 import IconMusic from '~icons/lucide/music';
 import IconPalette from '~icons/lucide/palette';
 import IconPlay from '~icons/lucide/play';
-import IconBarChart from '~icons/lucide/bar-chart-2';
+import IconBarChart from '~icons/lucide/bar-chart-3';
 import IconSave from '~icons/lucide/save';
 import IconDownload from '~icons/lucide/download';
 import IconUpload from '~icons/lucide/upload';
