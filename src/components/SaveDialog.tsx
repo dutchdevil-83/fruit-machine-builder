@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import { useConfigStore } from '../store/configStore';
 import { useToast } from './Toast';
+import { Modal } from './Modal';
+import { downloadJSON } from '../utils/fileUtils';
+import { savePreset } from '../utils/presetsStorage';
 
 import IconSave from '~icons/lucide/save';
 import IconDatabase from '~icons/lucide/database';
@@ -27,50 +30,19 @@ export function SaveDialog ( { isOpen, onClose }: SaveDialogProps )
 
         if ( storageType === 'internal' )
         {
-            // Save to localStorage
-            const presets = JSON.parse( localStorage.getItem( 'fmb_presets' ) || '{}' );
-            presets[ saveName ] = JSON.parse( json );
-            localStorage.setItem( 'fmb_presets', JSON.stringify( presets ) );
+            savePreset( saveName, json );
             showToast( `Saved "${ saveName }" to browser storage` );
         } else
         {
-            // Download as .fmb.json file
-            const blob = new Blob( [ json ], { type: 'application/json' } );
-            const url = URL.createObjectURL( blob );
-            const a = document.createElement( 'a' );
-            a.href = url;
-            a.download = `${ saveName.replace( /\s+/g, '_' ).toLowerCase() }.fmb.json`;
-            a.click();
-            URL.revokeObjectURL( url );
+            downloadJSON( `${ saveName.replace( /\s+/g, '_' ).toLowerCase() }.fmb.json`, json );
             showToast( `Exported "${ saveName }" as .fmb.json file` );
         }
         onClose();
     };
 
     return (
-        <>
-            <div
-                onClick={ onClose }
-                style={ {
-                    position: 'fixed', inset: 0,
-                    background: 'rgba(0,0,0,0.6)',
-                    zIndex: 15000,
-                } }
-            />
-            <div style={ {
-                position: 'fixed',
-                top: '50%', left: '50%',
-                transform: 'translate(-50%, -50%)',
-                background: 'var(--bg-card, #1e1e2e)',
-                border: '1px solid var(--border, #333)',
-                borderRadius: '12px',
-                padding: '24px',
-                zIndex: 15001,
-                width: '420px',
-                maxWidth: '90vw',
-                boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
-            } }>
-                <h3 style={ { marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' } }><IconSave /> Save Machine</h3>
+        <Modal onClose={ onClose } zIndex={ 15000 } width="420px" maxWidth="90vw">
+            <h3 style={ { marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' } }><IconSave /> Save Machine</h3>
 
                 {/* Name input */ }
                 <div style={ { display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '16px' } }>
@@ -123,7 +95,6 @@ export function SaveDialog ( { isOpen, onClose }: SaveDialogProps )
                         { storageType === 'internal' ? <><IconSave /> Save</> : <><IconDownload /> Export</> }
                     </button>
                 </div>
-            </div>
-        </>
+        </Modal>
     );
 }

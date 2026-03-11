@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { useConfigStore } from '../store/configStore';
 import { TEMPLATES } from '../data/templates';
 import type { TemplateInfo } from '../data/templates';
+import { Modal } from './Modal';
+import { savePreset } from '../utils/presetsStorage';
 
 export function TemplateSelector ()
 {
@@ -14,10 +16,7 @@ export function TemplateSelector ()
     {
         // 1. Auto-backup current config
         const backupName = `_auto_backup_${ new Date().toISOString().replace( /[:.]/g, '-' ) }`;
-        const presetsRaw = localStorage.getItem( 'fmb_presets' );
-        const db = presetsRaw ? JSON.parse( presetsRaw ) : {};
-        db[ backupName ] = exportJSON();
-        localStorage.setItem( 'fmb_presets', JSON.stringify( db ) );
+        savePreset( backupName, exportJSON() );
 
         // 2. Apply template
         importJSON( JSON.stringify( tpl.config ) );
@@ -73,14 +72,7 @@ export function TemplateSelector ()
 
             {/* Confirmation Modal */ }
             { showConfirm && (
-                <div style={ {
-                    position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 11000,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                } }>
-                    <div className="fade-in" style={ {
-                        background: 'var(--bg-card, #1e1e2e)', border: '1px solid var(--border)',
-                        borderRadius: '12px', padding: '24px', maxWidth: '480px', width: '90%',
-                    } }>
+                <Modal onClose={ () => setShowConfirm( null ) } zIndex={ 11000 } maxWidth="480px" width="90%" className="fade-in">
                         <h3 style={ { marginBottom: '12px' } }>⚠️ Apply "{ showConfirm.name }" Template?</h3>
 
                         <div style={ { padding: '12px', background: 'rgba(241,196,15,0.08)', border: '1px solid rgba(241,196,15,0.3)', borderRadius: '8px', marginBottom: '16px' } }>
@@ -102,8 +94,7 @@ export function TemplateSelector ()
                                 Apply Template
                             </button>
                         </div>
-                    </div>
-                </div>
+                </Modal>
             ) }
         </div>
     );
