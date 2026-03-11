@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import WaveformPlaylist from 'waveform-playlist';
 import { useConfigStore } from '../store/configStore';
+import { Modal } from './Modal';
 
 interface AudioEditorProps
 {
@@ -85,15 +86,22 @@ export function AudioEditor ( { isOpen, onClose }: AudioEditorProps )
     if ( !isOpen ) return null;
 
     return (
-        <>
-            <div onClick={ onClose } style={ { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', zIndex: 12000 } } />
-            <div className="fade-in" style={ {
-                position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
-                background: 'var(--bg-card)', border: '1px solid var(--win-gold)', borderRadius: '12px',
-                padding: '0', zIndex: 12001, width: '900px', maxWidth: '95vw', height: '600px',
-                display: 'flex', flexDirection: 'column', boxShadow: '0 12px 48px rgba(0,0,0,0.6)',
-                overflow: 'hidden'
-            } }>
+        <Modal
+            onClose={ onClose }
+            zIndex={ 12000 }
+            backdropOpacity={ 0.8 }
+            width="900px"
+            maxWidth="95vw"
+            height="600px"
+            padding="0"
+            className="fade-in"
+            style={ {
+                border: '1px solid var(--win-gold)',
+                display: 'flex', flexDirection: 'column',
+                overflow: 'hidden',
+                boxShadow: '0 12px 48px rgba(0,0,0,0.6)',
+            } }
+        >
                 <div style={ { padding: '16px 24px', background: 'rgba(255, 215, 0, 0.1)', borderBottom: '1px solid rgba(255, 215, 0, 0.2)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' } }>
                     <h2 style={ { margin: 0, display: 'flex', alignItems: 'center', gap: '8px' } }>
                         🎛️ Audio Editor
@@ -139,7 +147,6 @@ export function AudioEditor ( { isOpen, onClose }: AudioEditorProps )
                         .wp-container .cursor { background: var(--danger) !important; }
                     `}
                 </style>
-            </div>
-        </>
+        </Modal>
     );
 }

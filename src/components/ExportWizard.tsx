@@ -1,6 +1,8 @@
 import { useState, useMemo } from 'react';
 import { useConfigStore } from '../store/configStore';
 import { detectCorporateDevice } from '../utils/deviceDetector';
+import { Modal } from './Modal';
+import { downloadJSON } from '../utils/fileUtils';
 
 import IconPackage from '~icons/lucide/package';
 import IconGlobe from '~icons/lucide/globe';
@@ -34,13 +36,7 @@ export function ExportWizard ( { onClose }: { onClose: () => void } )
     {
         // Web ZIP: just trigger download of the config JSON for now
         const json = exportJSON();
-        const blob = new Blob( [ json ], { type: 'application/json' } );
-        const url = URL.createObjectURL( blob );
-        const a = document.createElement( 'a' );
-        a.href = url;
-        a.download = 'machine-config.json';
-        a.click();
-        URL.revokeObjectURL( url );
+        downloadJSON( 'machine-config.json', json );
         setStep( 'done' );
     };
 
@@ -51,14 +47,7 @@ export function ExportWizard ( { onClose }: { onClose: () => void } )
     };
 
     return (
-        <div style={ {
-            position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 12000,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-        } }>
-            <div className="fade-in" style={ {
-                background: 'var(--bg-card, #1e1e2e)', border: '1px solid var(--border)',
-                borderRadius: '12px', padding: '28px', maxWidth: '520px', width: '90%',
-            } }>
+        <Modal onClose={ onClose } zIndex={ 12000 } maxWidth="520px" width="90%" className="fade-in" style={ { padding: '28px' } }>
                 { step === 'format' && (
                     <>
                         <h3 style={ { marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' } }><IconPackage /> Export Your Machine</h3>
@@ -195,7 +184,6 @@ export function ExportWizard ( { onClose }: { onClose: () => void } )
                         </div>
                     </>
                 ) }
-            </div>
-        </div>
+        </Modal>
     );
 }

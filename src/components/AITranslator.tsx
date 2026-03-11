@@ -1,5 +1,7 @@
 import { useState, useCallback } from 'react';
 import IconBot from '~icons/lucide/bot';
+import { Modal } from './Modal';
+import { downloadJSON } from '../utils/fileUtils';
 
 interface LLMProvider {
   id: string;
@@ -126,27 +128,21 @@ export function AITranslator({ isOpen, onClose, sourceLocale }: AITranslatorProp
         output[line.key] = line.english; // Fallback to English for rejected
       }
     }
-    const blob = new Blob([JSON.stringify(output, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${targetCode}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
+    downloadJSON( `${targetCode}.json`, JSON.stringify(output, null, 2) );
     setStep('export');
   };
 
   if (!isOpen) return null;
 
   return (
-    <>
-      <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 15000 }} />
-      <div style={{
-        position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
-        background: 'var(--bg-panel)', border: '1px solid var(--border)', borderRadius: '12px',
-        padding: '24px', zIndex: 15001, width: '700px', maxWidth: '95vw', maxHeight: '85vh',
-        overflow: 'auto', boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
-      }}>
+    <Modal
+      onClose={onClose}
+      zIndex={15000}
+      width="700px"
+      maxWidth="95vw"
+      maxHeight="85vh"
+      style={{ background: 'var(--bg-panel)' }}
+    >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
           <h2 style={ { display: 'flex', alignItems: 'center', gap: '8px' } }><IconBot /> AI Translator</h2>
           <button className="btn" onClick={onClose} style={{ padding: '4px 10px' }}>✕</button>
@@ -377,7 +373,6 @@ export function AITranslator({ isOpen, onClose, sourceLocale }: AITranslatorProp
             </div>
           </div>
         )}
-      </div>
-    </>
+    </Modal>
   );
 }

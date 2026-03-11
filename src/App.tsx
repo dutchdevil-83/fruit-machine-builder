@@ -11,6 +11,7 @@ import { InterfaceDesigner } from './editors/InterfaceDesigner';
 import { StatsDashboard } from './editors/StatsDashboard';
 import { SimulatorView } from './simulator/SimulatorView';
 import { validateConfig } from './utils/configValidator';
+import { getPresetNames, loadPreset } from './utils/presetsStorage';
 import { OnboardingWizard } from './components/OnboardingWizard';
 import { HelpPanel } from './components/HelpPanel';
 import { ExportWizard } from './components/ExportWizard';
@@ -239,27 +240,16 @@ function PresetManager ()
 
   useEffect( () =>
   {
-    const p = localStorage.getItem( 'fmb_presets' );
-    if ( p )
-    {
-      const keys = Object.keys( JSON.parse( p ) );
-      setPresets( keys );
-      if ( keys.length > 0 ) setSelected( keys[ 0 ]! );
-    }
+    const keys = getPresetNames();
+    setPresets( keys );
+    if ( keys.length > 0 ) setSelected( keys[ 0 ]! );
   }, [] );
 
-  const loadPreset = () =>
+  const handleLoadPreset = () =>
   {
     if ( !selected ) return;
-    const p = localStorage.getItem( 'fmb_presets' );
-    if ( p )
-    {
-      const db = JSON.parse( p );
-      if ( db[ selected ] )
-      {
-        importJSON( db[ selected ] );
-      }
-    }
+    const json = loadPreset( selected );
+    if ( json ) importJSON( json );
   };
 
   return (
@@ -275,7 +265,7 @@ function PresetManager ()
         <option value="" disabled>Presets...</option>
         { presets.map( p => <option key={ p } value={ p }>{ p }</option> ) }
       </select>
-      <button className="btn btn-icon" onClick={ loadPreset } disabled={ !selected } title="Load Preset">
+      <button className="btn btn-icon" onClick={ handleLoadPreset } disabled={ !selected } title="Load Preset">
         <IconFolderOpen />
       </button>
     </div>
